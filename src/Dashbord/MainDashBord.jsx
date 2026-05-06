@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { onForegroundMessage, generateAndSaveFCMToken } from "../config/firebase";
 import {
   FaBorderAll,
   FaListAlt,
@@ -63,6 +64,46 @@ export default function MainDashBord() {
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
     if (savedUser) setUser(JSON.parse(savedUser));
+  }, []);
+
+  // ✅ Automatically request notification permission and save token
+  useEffect(() => {
+    const setupNotifications = async () => {
+      const authToken = localStorage.getItem("token");
+      if (authToken) {
+        await generateAndSaveFCMToken(authToken);
+      }
+    };
+    setupNotifications();
+  }, []);
+
+  // ✅ Foreground FCM Notification listener
+  useEffect(() => {
+    const unsubscribe = onForegroundMessage((payload) => {
+      const title = payload?.notification?.title || '🔔 New Notification';
+      const body = payload?.notification?.body || '';
+
+      // Use SweetAlert for a premium look in the dashboard instead of system popups
+      Swal.fire({
+        title: title,
+        text: body,
+        icon: 'info',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 5000,
+        timerProgressBar: true,
+        background: '#1a1a2e',
+        color: '#F3C06A',
+        iconColor: '#D4AF37',
+        didOpen: (toast) => {
+          toast.addEventListener('mouseenter', Swal.stopTimer)
+          toast.addEventListener('mouseleave', Swal.resumeTimer)
+          // Play a subtle notification sound if needed
+        }
+      });
+    });
+    return () => unsubscribe && unsubscribe();
   }, []);
 
   /* SCREEN CHECK */

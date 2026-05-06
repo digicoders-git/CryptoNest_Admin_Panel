@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { FaLock, FaEnvelope, FaRocket } from "react-icons/fa";
+import { generateAndSaveFCMToken } from "./config/firebase";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -37,6 +38,9 @@ export default function Login() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("superAdminToken", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
+
+        // ✅ FCM Token generate karo aur backend pe save karo
+        generateAndSaveFCMToken(data.token);
 
         await Swal.fire({
           icon: "success",

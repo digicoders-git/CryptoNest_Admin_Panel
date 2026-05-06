@@ -269,58 +269,6 @@ const MasterDashboard = () => {
             </div>
           </div>
 
-          {/* Today Earnings Card */}
-          <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-500/30 rounded-2xl p-6 shadow-2xl hover:shadow-yellow-500/10 transition-all duration-300">
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="text-yellow-500 text-sm uppercase tracking-wider">Today's Earnings</div>
-                <div className="text-3xl font-bold mt-2 text-white">{data.finance?.todayEarnings || 0} ETH</div>
-                <div className="text-gray-400 text-sm mt-2">Revenue Today</div>
-              </div>
-              <div className="text-3xl opacity-50"><FaChartBar className="text-yellow-500/50" /></div>
-            </div>
-          </div>
-        </div>
-
-        {/* ========== STATS CARDS - ROW 2 ========== */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-
-          {/* NFT Sales Card */}
-          <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-500/30 rounded-2xl p-6">
-            <div className="flex items-center gap-2 text-yellow-500 text-sm uppercase tracking-wider"><FaShoppingCart /> NFT Sales</div>
-            <div className="text-3xl font-bold mt-2 text-white">{data.finance?.totalNFTSaleEarnings || 0} ETH</div>
-            <div className="mt-3 space-y-1 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Pre-Launch:</span>
-                <span className="text-yellow-500">{data.nfts?.preLaunchSold || 0} sold</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Trading:</span>
-                <span className="text-yellow-500">{data.nfts?.tradingSold || 0} sold</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Registration Card */}
-          <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-500/30 rounded-2xl p-6">
-            <div className="flex items-center gap-2 text-yellow-500 text-sm uppercase tracking-wider"><FaUserPlus /> Registrations</div>
-            <div className="text-3xl font-bold mt-2 text-white">{data.finance?.totalRegistrations || 0}</div>
-            <div className="text-gray-400 text-sm mt-1">Total Users Registered</div>
-            <div className="mt-2 text-sm">
-              <span className="text-yellow-500">Fees Collected:</span> {data.finance?.totalRegistrationFees || 0} ETH
-            </div>
-          </div>
-
-          {/* Referral Card */}
-          <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-500/30 rounded-2xl p-6">
-            <div className="flex items-center gap-2 text-yellow-500 text-sm uppercase tracking-wider"><FaHandshake /> Referral Program</div>
-            <div className="text-3xl font-bold mt-2 text-white">{data.finance?.totalReferralPaid || 0} ETH</div>
-            <div className="text-gray-400 text-sm mt-1">Total Referral Commission Paid</div>
-            <div className="mt-2 text-sm">
-              <span className="text-yellow-500">MLM Total Paid:</span> {data.mlm?.totalPaid || 0} ETH
-            </div>
-          </div>
-
           {/* Contacts Card */}
           <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-500/30 rounded-2xl p-6 shadow-2xl hover:shadow-yellow-500/10 transition-all duration-300">
             <div className="flex justify-between items-start">
@@ -332,9 +280,11 @@ const MasterDashboard = () => {
               <div className="text-3xl opacity-50"><FaPhoneAlt className="text-yellow-500/50" /></div>
             </div>
           </div>
+
+          {/* Today Earnings Card - REMOVED */}
         </div>
 
-        {/* ========== STATS CARDS - ROW 3 ========== */}
+        {/* ========== STATS CARDS - ROW 2 ========== */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
 
           {/* Notifications Card */}
