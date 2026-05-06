@@ -1,0 +1,612 @@
+{
+  "nft_api_documentation": {
+    "title": "Complete NFT Management API Documentation",
+    "version": "1.0.0",
+    "base_url": "https://api.gtnworld.live",
+    "description": "Complete API documentation for NFT management system with MLM integration",
+    
+    "authentication": {
+      "type": "Bearer Token",
+      "header": "Authorization: Bearer <token>",
+      "tokens": {
+        "admin_token": "superAdminToken or token from localStorage",
+        "user_token": "token from localStorage"
+      }
+    },
+
+    "api_endpoints": {
+      
+      "1_create_nft_batch": {
+        "endpoint": "POST /api/admin-settings/nft/create-batch",
+        "description": "Admin creates a batch of NFTs for marketplace",
+        "access": "Admin only",
+        "request": {
+          "method": "POST",
+          "headers": {
+            "Authorization": "Bearer <admin_token>",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "batchSize": 4,
+            "basePrice": 15
+          }
+        },
+        "response_success": {
+          "success": true,
+          "message": "NFT batch created successfully",
+          "data": {
+            "batchId": 1,
+            "nftsCreated": 4,
+            "nfts": [
+              {
+                "nftId": "ADMIN_BATCH_1_1_1234567890",
+                "userId": null,
+                "batchId": 1,
+                "buyPrice": 15,
+                "sellPrice": 30,
+                "status": "listed",
+                "generation": 1,
+                "isLocked": false,
+                "createdAt": "2024-01-15T10:30:00Z"
+              }
+            ]
+          }
+        },
+        "response_error": {
+          "success": false,
+          "message": "NFT.countDocuments is not a function",
+          "error": "Model not properly imported"
+        },
+        "business_logic": {
+          "nft_properties": {
+            "nftId": "ADMIN_BATCH_{batchId}_{index}_{timestamp}",
+            "userId": null,
+            "buyPrice": "basePrice from request",
+            "sellPrice": "basePrice * 2 (2x multiplier)",
+            "status": "listed (ready for purchase)",
+            "generation": 1,
+            "isLocked": false
+          },
+          "database_operations": [
+            "Create NFT documents in database",
+            "Update company stats",
+            "Log admin action"
+          ]
+        }
+      },
+
+      "2_get_nft_stats": {
+        "endpoint": "GET /api/admin-settings/nft/stats",
+        "description": "Get NFT statistics for admin dashboard",
+        "access": "Admin only",
+        "request": {
+          "method": "GET",
+          "headers": {
+            "Authorization": "Bearer <admin_token>"
+          }
+        },
+        "response_success": {
+          "success": true,
+          "data": {
+            "totalNFTs": 150,
+            "listedNFTs": 45,
+            "soldNFTs": 85,
+            "lockedNFTs": 20,
+            "totalRevenue": 2550,
+            "companyEarnings": 1020,
+            "userEarnings": 1020,
+            "parentBonuses": 510,
+            "generationStats": {
+              "generation_1": 50,
+              "generation_2": 75,
+              "generation_3": 25
+            }
+          }
+        },
+        "database_queries": [
+          "COUNT(*) FROM nfts",
+          "COUNT(*) FROM nfts WHERE status = 'listed'",
+          "COUNT(*) FROM nfts WHERE status = 'sold'",
+          "SUM(sellPrice) FROM nfts WHERE status = 'sold'"
+        ]
+      },
+
+      "3_get_marketplace": {
+        "endpoint": "GET /api/nft/marketplace",
+        "description": "Get all NFTs available for purchase",
+        "access": "User and Admin",
+        "request": {
+          "method": "GET",
+          "headers": {
+            "Authorization": "Bearer <token>"
+          },
+          "query_params": {
+            "page": 1,
+            "limit": 20,
+            "generation": "optional",
+            "priceRange": "optional"
+          }
+        },
+        "response_success": {
+          "success": true,
+          "data": [
+            {
+              "nftId": "ADMIN_BATCH_1_1_1234567890",
+              "buyPrice": 15,
+              "sellPrice": 30,
+              "status": "listed",
+              "generation": 1,
+              "isLocked": false,
+              "createdAt": "2024-01-15T10:30:00Z",
+              "createdBy": "admin"
+            },
+            {
+              "nftId": "NFT_1234567890_2_user123",
+              "buyPrice": 15,
+              "sellPrice": 30,
+              "status": "listed",
+              "generation": 2,
+              "isLocked": false,
+              "createdAt": "2024-01-15T11:45:00Z",
+              "createdBy": "user_sale"
+            }
+          ],
+          "pagination": {
+            "currentPage": 1,
+            "totalPages": 3,
+            "totalItems": 45,
+            "itemsPerPage": 20
+          }
+        },
+        "filter_logic": {
+          "status": "listed",
+          "isLocked": false,
+          "userId": null
+        }
+      },
+
+      "4_buy_nft": {
+        "endpoint": "POST /api/nft/buy",
+        "description": "User purchases an NFT from marketplace",
+        "access": "User only",
+        "request": {
+          "method": "POST",
+          "headers": {
+            "Authorization": "Bearer <user_token>",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "nftId": "ADMIN_BATCH_1_1_1234567890"
+          }
+        },
+        "response_success": {
+          "success": true,
+          "message": "NFT purchased successfully",
+          "data": {
+            "nftId": "ADMIN_BATCH_1_1_1234567890",
+            "buyPrice": 15,
+            "userBalance": {
+              "before": 50,
+              "after": 35,
+              "deducted": 15
+            },
+            "nftStatus": {
+              "before": "listed",
+              "after": "hold"
+            },
+            "transactionId": "TXN_1234567890"
+          }
+        },
+        "validation_rules": [
+          "User must be active",
+          "User must not be frozen",
+          "User must have canTrade = true",
+          "User balance >= NFT buyPrice",
+          "Daily investment limit not exceeded",
+          "NFT must be listed and not locked"
+        ],
+        "business_logic": {
+          "user_balance": "Deduct buyPrice from user balance",
+          "nft_ownership": "Set userId to buyer's ID",
+          "nft_status": "Change from 'listed' to 'hold'",
+          "transaction_log": "Create nft_purchase transaction",
+          "company_earning": "Add buyPrice to company earnings"
+        }
+      },
+
+      "5_sell_nft": {
+        "endpoint": "POST /api/nft/sell/:nftId",
+        "description": "User sells their NFT and generates new NFTs",
+        "access": "User only",
+        "request": {
+          "method": "POST",
+          "headers": {
+            "Authorization": "Bearer <user_token>",
+            "Content-Type": "application/json"
+          },
+          "params": {
+            "nftId": "ADMIN_BATCH_1_1_1234567890"
+          }
+        },
+        "response_success": {
+          "success": true,
+          "message": "NFT sold successfully",
+          "data": {
+            "saleAmount": 30,
+            "profitDistribution": {
+              "userShare": 12,
+              "companyShare": 12,
+              "parentBonus": 6
+            },
+            "userBalance": {
+              "before": 35,
+              "after": 47,
+              "added": 12
+            },
+            "newNFTs": [
+              {
+                "nftId": "NFT_1234567890_1_user123",
+                "buyPrice": 15,
+                "sellPrice": 30,
+                "status": "locked",
+                "isLocked": true,
+                "generation": 2
+              },
+              {
+                "nftId": "NFT_1234567890_2_user123",
+                "buyPrice": 15,
+                "sellPrice": 30,
+                "status": "listed",
+                "isLocked": false,
+                "generation": 2
+              }
+            ],
+            "transactions": [
+              {
+                "type": "nft_sale",
+                "amount": 12,
+                "description": "User share from NFT sale"
+              },
+              {
+                "type": "company_earning",
+                "amount": 12,
+                "description": "Company share from NFT sale"
+              },
+              {
+                "type": "nft_parent_bonus",
+                "amount": 6,
+                "description": "Parent bonus from NFT sale"
+              }
+            ]
+          }
+        },
+        "validation_rules": [
+          "User must own the NFT",
+          "NFT status must be 'hold'",
+          "User must have more than 1 NFT (cannot sell last NFT)"
+        ],
+        "profit_distribution": {
+          "total_sale_amount": "sellPrice (30)",
+          "user_share": "40% of sellPrice (12)",
+          "company_share": "40% of sellPrice (12)",
+          "parent_share": "20% of sellPrice (6)"
+        },
+        "nft_generation": {
+          "new_nft_count": 2,
+          "first_nft": {
+            "status": "locked",
+            "isLocked": true,
+            "description": "User keeps this NFT"
+          },
+          "second_nft": {
+            "status": "listed",
+            "isLocked": false,
+            "description": "Available in marketplace"
+          },
+          "generation": "parent_generation + 1"
+        }
+      },
+
+      "6_get_user_nfts": {
+        "endpoint": "GET /api/nft/my-nfts",
+        "description": "Get all NFTs owned by current user",
+        "access": "User only",
+        "request": {
+          "method": "GET",
+          "headers": {
+            "Authorization": "Bearer <user_token>"
+          },
+          "query_params": {
+            "status": "optional (hold, locked)",
+            "generation": "optional"
+          }
+        },
+        "response_success": {
+          "success": true,
+          "data": [
+            {
+              "nftId": "ADMIN_BATCH_1_1_1234567890",
+              "buyPrice": 15,
+              "sellPrice": 30,
+              "status": "hold",
+              "generation": 1,
+              "isLocked": false,
+              "purchasedAt": "2024-01-15T12:00:00Z",
+              "canSell": true
+            },
+            {
+              "nftId": "NFT_1234567890_1_user123",
+              "buyPrice": 15,
+              "sellPrice": 30,
+              "status": "locked",
+              "generation": 2,
+              "isLocked": true,
+              "purchasedAt": "2024-01-15T13:30:00Z",
+              "canSell": false
+            }
+          ],
+          "summary": {
+            "totalNFTs": 2,
+            "holdNFTs": 1,
+            "lockedNFTs": 1,
+            "totalValue": 60,
+            "canSellCount": 1
+          }
+        }
+      },
+
+      "7_get_transactions": {
+        "endpoint": "GET /api/admin-settings/nft/transactions",
+        "description": "Get all NFT-related transactions (Admin only)",
+        "access": "Admin only",
+        "request": {
+          "method": "GET",
+          "headers": {
+            "Authorization": "Bearer <admin_token>"
+          },
+          "query_params": {
+            "page": 1,
+            "limit": 50,
+            "type": "optional (nft_purchase, nft_sale, company_earning, nft_parent_bonus)",
+            "userId": "optional",
+            "dateFrom": "optional",
+            "dateTo": "optional"
+          }
+        },
+        "response_success": {
+          "success": true,
+          "data": [
+            {
+              "_id": "TXN_1234567890",
+              "type": "nft_purchase",
+              "userId": "user123",
+              "userName": "John Doe",
+              "userEmail": "john@example.com",
+              "nftId": "ADMIN_BATCH_1_1_1234567890",
+              "amount": -15,
+              "description": "NFT purchased: ADMIN_BATCH_1_1_1234567890",
+              "createdAt": "2024-01-15T12:00:00Z"
+            },
+            {
+              "_id": "TXN_1234567891",
+              "type": "nft_sale",
+              "userId": "user123",
+              "userName": "John Doe",
+              "userEmail": "john@example.com",
+              "nftId": "ADMIN_BATCH_1_1_1234567890",
+              "amount": 12,
+              "description": "User share from NFT sale",
+              "createdAt": "2024-01-15T13:30:00Z"
+            },
+            {
+              "_id": "TXN_1234567892",
+              "type": "company_earning",
+              "userId": null,
+              "userName": "System",
+              "userEmail": null,
+              "nftId": "ADMIN_BATCH_1_1_1234567890",
+              "amount": 12,
+              "description": "Company share from NFT sale",
+              "createdAt": "2024-01-15T13:30:00Z"
+            },
+            {
+              "_id": "TXN_1234567893",
+              "type": "nft_parent_bonus",
+              "userId": "parent456",
+              "userName": "Jane Smith",
+              "userEmail": "jane@example.com",
+              "nftId": "ADMIN_BATCH_1_1_1234567890",
+              "amount": 6,
+              "description": "Parent bonus from NFT sale",
+              "createdAt": "2024-01-15T13:30:00Z"
+            }
+          ],
+          "pagination": {
+            "currentPage": 1,
+            "totalPages": 5,
+            "totalItems": 245,
+            "itemsPerPage": 50
+          },
+          "summary": {
+            "totalPurchases": 85,
+            "totalSales": 65,
+            "totalCompanyEarnings": 1020,
+            "totalParentBonuses": 510
+          }
+        }
+      }
+    },
+
+    "database_models": {
+      "nft_model": {
+        "collection": "nfts",
+        "schema": {
+          "nftId": {
+            "type": "String",
+            "unique": true,
+            "required": true,
+            "description": "Unique NFT identifier"
+          },
+          "userId": {
+            "type": "ObjectId",
+            "ref": "User",
+            "default": null,
+            "description": "Owner of NFT, null for admin-created"
+          },
+          "batchId": {
+            "type": "Number",
+            "description": "Batch number for admin-created NFTs"
+          },
+          "buyPrice": {
+            "type": "Number",
+            "required": true,
+            "description": "Price to buy this NFT"
+          },
+          "sellPrice": {
+            "type": "Number",
+            "required": true,
+            "description": "Price when selling this NFT (2x buyPrice)"
+          },
+          "status": {
+            "type": "String",
+            "enum": ["listed", "hold", "locked", "sold"],
+            "default": "listed",
+            "description": "Current NFT status"
+          },
+          "generation": {
+            "type": "Number",
+            "default": 1,
+            "description": "NFT generation (1=admin, 2+=user-generated)"
+          },
+          "isLocked": {
+            "type": "Boolean",
+            "default": false,
+            "description": "Whether NFT is locked from trading"
+          },
+          "parentNftId": {
+            "type": "String",
+            "description": "ID of parent NFT that generated this one"
+          },
+          "createdAt": {
+            "type": "Date",
+            "default": "Date.now"
+          },
+          "updatedAt": {
+            "type": "Date",
+            "default": "Date.now"
+          }
+        }
+      },
+      
+      "transaction_model": {
+        "collection": "transactions",
+        "nft_transaction_types": [
+          {
+            "type": "nft_purchase",
+            "description": "User buys NFT from marketplace",
+            "amount": "Negative (deducted from user)",
+            "userId": "Buyer's ID"
+          },
+          {
+            "type": "nft_sale",
+            "description": "User's share from selling NFT",
+            "amount": "Positive (40% of sale price)",
+            "userId": "Seller's ID"
+          },
+          {
+            "type": "company_earning",
+            "description": "Company's share from NFT transactions",
+            "amount": "Positive (40% of sale price + 100% of purchase)",
+            "userId": null
+          },
+          {
+            "type": "nft_parent_bonus",
+            "description": "Parent's bonus from child's NFT sale",
+            "amount": "Positive (20% of sale price)",
+            "userId": "Parent's ID"
+          }
+        ]
+      }
+    },
+
+    "business_rules": {
+      "nft_lifecycle": [
+        "Admin creates NFT → status: 'listed'",
+        "User buys NFT → status: 'hold', userId: set",
+        "User sells NFT → status: 'sold', generates 2 new NFTs",
+        "New NFT 1 → status: 'locked', userId: seller",
+        "New NFT 2 → status: 'listed', userId: null"
+      ],
+      
+      "pricing_rules": {
+        "sell_price": "Always 2x buy_price",
+        "profit_split": {
+          "user_share": "40% of sell_price",
+          "company_share": "40% of sell_price",
+          "parent_bonus": "20% of sell_price"
+        }
+      },
+      
+      "validation_rules": {
+        "buy_nft": [
+          "User must be active and not frozen",
+          "User must have canTrade = true",
+          "User balance >= NFT buyPrice",
+          "Daily investment limit not exceeded",
+          "NFT must be listed and not locked"
+        ],
+        "sell_nft": [
+          "User must own the NFT",
+          "NFT status must be 'hold'",
+          "User must have more than 1 NFT"
+        ]
+      },
+      
+      "generation_system": {
+        "generation_1": "Admin-created NFTs",
+        "generation_2": "NFTs from gen 1 sales",
+        "generation_n": "NFTs from gen (n-1) sales",
+        "max_generation": "No limit defined"
+      }
+    },
+
+    "error_codes": {
+      "NFT_001": "NFT not found",
+      "NFT_002": "NFT not available for purchase",
+      "NFT_003": "Insufficient balance",
+      "NFT_004": "User not authorized to sell this NFT",
+      "NFT_005": "Cannot sell last NFT",
+      "NFT_006": "Daily investment limit exceeded",
+      "NFT_007": "User account frozen",
+      "NFT_008": "Trading disabled for user",
+      "NFT_009": "Invalid NFT batch parameters",
+      "NFT_010": "Database operation failed"
+    },
+
+    "implementation_notes": {
+      "backend_requirements": [
+        "MongoDB with NFT and Transaction collections",
+        "User authentication middleware",
+        "Admin authorization middleware",
+        "Balance validation middleware",
+        "Transaction logging system"
+      ],
+      
+      "frontend_integration": [
+        "Error handling for all API calls",
+        "Loading states during operations",
+        "Real-time balance updates",
+        "NFT status updates",
+        "Transaction history display"
+      ],
+      
+      "security_considerations": [
+        "Validate user ownership before NFT operations",
+        "Check user permissions for admin endpoints",
+        "Prevent double-spending attacks",
+        "Validate all numeric inputs",
+        "Log all financial transactions"
+      ]
+    }
+  }
+}
