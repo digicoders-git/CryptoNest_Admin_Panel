@@ -29,6 +29,8 @@ export default function NFTAdmin() {
   const [nftStatus, setNftStatus] = useState(null);
   const [marketplace, setMarketplace] = useState(null);
   const [nftTransactions, setNftTransactions] = useState([]);
+  const [totalNFTs, setTotalNFTs] = useState("");
+  const [nftInputError, setNftInputError] = useState("");
 
   const apiCall = async (endpoint, method = "GET", body = null) => {
     try {
@@ -54,10 +56,29 @@ export default function NFTAdmin() {
     }
   };
 
+  const handleNFTInputChange = (e) => {
+    const val = e.target.value;
+    setTotalNFTs(val);
+    const num = parseInt(val);
+    if (!val) {
+      setNftInputError("");
+    } else if (isNaN(num) || num < 4) {
+      setNftInputError("Minimum 4 NFTs required");
+    } else if (num % 4 !== 0) {
+      setNftInputError(`Must be divisible by 4. Try ${num - (num % 4)} or ${num + (4 - (num % 4))}`);
+    } else {
+      setNftInputError("");
+    }
+  };
+
   const initializeNFTSystem = async () => {
+    const num = parseInt(totalNFTs);
+    if (!totalNFTs || isNaN(num) || num < 4 || num % 4 !== 0) return;
+
+    const batches = num / 4;
     Swal.fire({
       title: "Initialize System?",
-      text: "This will generate 500 CryptoNest in 125 batches. Are you sure?",
+      html: `This will generate <b style="color:#D4AF37">${num} CryptoNest</b> in <b style="color:#D4AF37">${batches} batches</b> (4 per batch). Are you sure?`,
       icon: "warning",
       showCancelButton: true,
       background: "#000",
@@ -68,7 +89,7 @@ export default function NFTAdmin() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         setLoading(true);
-        const res = await apiCall("/initialize", "POST");
+        const res = await apiCall("/initialize", "POST", { totalNFTs: num });
         setLoading(false);
         if (res.message) {
           Swal.fire({
@@ -79,6 +100,7 @@ export default function NFTAdmin() {
             color: "#D4AF37",
             confirmButtonColor: "#D4AF37",
           });
+          setTotalNFTs("");
           fetchNFTStatus();
           fetchMarketplace();
         } else {
@@ -135,11 +157,23 @@ export default function NFTAdmin() {
 
   // ========== HIGHCHARTS CONFIGURATIONS ==========
 
-  // NFT Distribution Chart (500 Total NFTs)
+  // Dynamic values from API
+  const totalNFTsFromAPI = nftStatus?.preLaunch?.totalNFTs || 0;
+  const availableNFTs = nftStatus?.preLaunch?.availableNFTs || 0;
+  const soldNFTs = nftStatus?.preLaunch?.soldNFTs || (totalNFTsFromAPI - availableNFTs);
+  const totalBatches = totalNFTsFromAPI > 0 ? totalNFTsFromAPI / 4 : 0;
+  const maxPerUser = nftStatus?.preLaunch?.maxPerUser || 0;
+  const pricePerNFT = nftStatus?.preLaunch?.pricePerNFT ?? 20;
+  const currentPhase = nftStatus?.currentPhase || "pre-launch";
+  const currentBatch = marketplace?.batchInfo?.currentBatch || 0;
+  const batchProgress = marketplace?.batchInfo?.batchProgress || "0/4";
+  const progressPercent = totalBatches > 0 ? Math.round((currentBatch / totalBatches) * 100) : 0;
+
+  // NFT Distribution Chart — fully dynamic
   const nftDistributionChart = {
     chart: { type: 'pie', backgroundColor: 'transparent', options3d: { enabled: true, alpha: 45 } },
     title: { text: '🎨 NFT Asset Distribution', style: { color: '#D4AF37', fontSize: '16px', fontWeight: 'bold' } },
-    subtitle: { text: 'Total Supply: 500 NFTs', style: { color: '#888888' } },
+    subtitle: { text: `Total Supply: ${totalNFTsFromAPI} NFTs`, style: { color: '#888888' } },
     plotOptions: {
       pie: {
         innerSize: '60%',
@@ -152,8 +186,8 @@ export default function NFTAdmin() {
     series: [{
       name: 'NFTs',
       data: [
-        { name: 'Available', y: nftStatus?.preLaunch?.availableNFTs || 500, color: '#D4AF37' },
-        { name: 'Sold', y: 500 - (nftStatus?.preLaunch?.availableNFTs || 500), color: '#FFA500' }
+        { name: 'Available', y: availableNFTs, color: '#D4AF37' },
+        { name: 'Sold', y: soldNFTs, color: '#FFA500' }
       ]
     }]
   };
@@ -165,14 +199,14 @@ export default function NFTAdmin() {
     pane: { startAngle: -150, endAngle: 150, background: { backgroundColor: '#333', borderWidth: 0 } },
     yAxis: {
       min: 0,
-      max: 125,
+      max: totalBatches || 1,
       title: { text: 'Batches', style: { color: '#D4AF37' } },
       labels: { style: { color: '#D4AF37' } },
-      plotBands: [{ from: 0, to: 125, color: '#D4AF37' }]
+      plotBands: [{ from: 0, to: totalBatches || 1, color: '#D4AF37' }]
     },
     series: [{
       name: 'Progress',
-      data: [marketplace?.currentBatch || 1],
+      data: [currentBatch || 0],
       tooltip: { valueSuffix: ' batches' },
       dial: { radius: '80%', backgroundColor: '#D4AF37' },
       pivot: { backgroundColor: '#D4AF37' }
@@ -183,7 +217,7 @@ export default function NFTAdmin() {
   const priceChart = {
     chart: { type: 'column', backgroundColor: 'transparent', options3d: { enabled: true, alpha: 15 } },
     title: { text: '💰 Asset Pricing', style: { color: '#D4AF37', fontSize: '16px', fontWeight: 'bold' } },
-    xAxis: { categories: ['Current Price'], labels: { style: { color: '#D4AF37' } } },
+    xAxis: { categories: ['Buy Price', 'Sell Price'], labels: { style: { color: '#D4AF37' } } },
     yAxis: { title: { text: 'Price (USD)', style: { color: '#D4AF37' } }, labels: { style: { color: '#D4AF37' } } },
     plotOptions: {
       column: {
@@ -192,7 +226,7 @@ export default function NFTAdmin() {
     },
     series: [{
       name: 'Price',
-      data: [nftStatus?.preLaunch?.pricePerNFT || 10],
+      data: [pricePerNFT, pricePerNFT],
       color: '#D4AF37'
     }]
   };
@@ -201,7 +235,7 @@ export default function NFTAdmin() {
   const phaseChart = {
     chart: { type: 'bar', backgroundColor: 'transparent' },
     title: { text: '⏱️ System Phase Timeline', style: { color: '#D4AF37', fontSize: '16px', fontWeight: 'bold' } },
-    xAxis: { categories: ['Pre-Launch', 'Trading', 'Burning'], labels: { style: { color: '#D4AF37' } } },
+    xAxis: { categories: ['Pre-Launch', 'Trading', 'Blockchain'], labels: { style: { color: '#D4AF37' } } },
     yAxis: { title: { text: 'Status', style: { color: '#D4AF37' } }, labels: { enabled: false } },
     plotOptions: {
       bar: {
@@ -211,9 +245,9 @@ export default function NFTAdmin() {
     series: [{
       name: 'Phase',
       data: [
-        { y: 1, name: '🟢 Active', color: '#D4AF37' },
-        { y: 0.5, name: '⚪ Pending', color: '#444' },
-        { y: 0.5, name: '⚪ Pending', color: '#444' }
+        { y: 1, name: currentPhase === 'pre-launch' ? '🟢 Active' : '✅ Done', color: currentPhase === 'pre-launch' ? '#D4AF37' : '#22c55e' },
+        { y: 1, name: currentPhase === 'trading' ? '🟢 Active' : currentPhase === 'blockchain' ? '✅ Done' : '⚪ Pending', color: currentPhase === 'trading' ? '#D4AF37' : currentPhase === 'blockchain' ? '#22c55e' : '#444' },
+        { y: 1, name: currentPhase === 'blockchain' ? '🟢 Active' : '⚪ Pending', color: currentPhase === 'blockchain' ? '#D4AF37' : '#444' }
       ]
     }]
   };
@@ -295,14 +329,41 @@ export default function NFTAdmin() {
                 <p className="text-xs text-[#D4AF37]/50 uppercase tracking-wider">Deploy Core CryptoNestAssets</p>
               </div>
             </div>
-            <p className="text-gray-400 text-sm mb-6 leading-relaxed">
-              Creates <span className="text-[#D4AF37] font-bold">500 unique NFT assets</span> distributed across
-              <span className="text-[#D4AF37] font-bold"> 125 strategic batches</span> (4 assets per batch) and registers them in the immutable database.
+            <p className="text-gray-400 text-sm mb-4 leading-relaxed">
+              Enter total NFT count (must be divisible by 4). Each batch contains
+              <span className="text-[#D4AF37] font-bold"> 4 assets</span>. System registers them in the immutable database.
             </p>
+
+            {/* NFT Number Input */}
+            <div className="mb-4">
+              <label className="text-xs text-[#D4AF37]/70 uppercase tracking-wider mb-2 block">
+                Total NFT Count
+              </label>
+              <input
+                type="number"
+                min="4"
+                step="4"
+                value={totalNFTs}
+                onChange={handleNFTInputChange}
+                placeholder="e.g. 500, 1000, 2000..."
+                className="w-full bg-black/60 border border-[#D4AF37]/30 focus:border-[#D4AF37] text-white placeholder-gray-600 rounded-xl px-4 py-3 text-sm outline-none transition-all duration-200"
+              />
+              {nftInputError && (
+                <p className="text-red-400 text-xs mt-1.5 flex items-center gap-1">
+                  <span>⚠</span> {nftInputError}
+                </p>
+              )}
+              {totalNFTs && !nftInputError && parseInt(totalNFTs) >= 4 && (
+                <p className="text-emerald-400 text-xs mt-1.5">
+                  ✓ {parseInt(totalNFTs)} NFTs → {parseInt(totalNFTs) / 4} batches
+                </p>
+              )}
+            </div>
+
             <button
               onClick={initializeNFTSystem}
-              disabled={loading}
-              className="w-full py-3.5 bg-gradient-to-r from-[#F3C06A] to-[#D4AF37] text-black font-bold uppercase text-sm tracking-wider rounded-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              disabled={loading || !totalNFTs || !!nftInputError || parseInt(totalNFTs) < 4}
+              className="w-full py-3.5 bg-gradient-to-r from-[#F3C06A] to-[#D4AF37] text-black font-bold uppercase text-sm tracking-wider rounded-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <FaPlay className={loading ? "animate-pulse" : ""} />
               {loading ? "Generating Assets..." : "Initialize System"}
@@ -314,22 +375,22 @@ export default function NFTAdmin() {
             <div className="grid grid-cols-2 gap-4 h-full">
               <div className="text-center p-3 bg-[#D4AF37]/5 rounded-xl">
                 <FaBoxes className="text-2xl text-[#D4AF37] mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{nftStatus?.preLaunch?.availableNFTs || 500}</div>
+                <div className="text-2xl font-bold text-white">{availableNFTs}</div>
                 <div className="text-xs text-gray-500">Available CryptoNest</div>
               </div>
               <div className="text-center p-3 bg-[#D4AF37]/5 rounded-xl">
                 <FaDollarSign className="text-2xl text-[#D4AF37] mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">${nftStatus?.preLaunch?.pricePerNFT || 10}</div>
+                <div className="text-2xl font-bold text-white">${pricePerNFT}</div>
                 <div className="text-xs text-gray-500">Price Per CryptoNest</div>
               </div>
               <div className="text-center p-3 bg-[#D4AF37]/5 rounded-xl">
                 <FaUsers className="text-2xl text-[#D4AF37] mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{nftStatus?.preLaunch?.maxPerUser || 2}</div>
+                <div className="text-2xl font-bold text-white">{maxPerUser}</div>
                 <div className="text-xs text-gray-500">Max Per User</div>
               </div>
               <div className="text-center p-3 bg-[#D4AF37]/5 rounded-xl">
                 <FaPercentage className="text-2xl text-[#D4AF37] mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{marketplace?.currentBatch ? Math.round((marketplace.currentBatch / 125) * 100) : 0}%</div>
+                <div className="text-2xl font-bold text-white">{progressPercent}%</div>
                 <div className="text-xs text-gray-500">Total Progress</div>
               </div>
             </div>
@@ -378,15 +439,15 @@ export default function NFTAdmin() {
                   </div>
                   <div className="bg-black/50 border border-[#D4AF37]/20 rounded-xl p-4 text-center">
                     <p className="text-xs text-[#D4AF37]/60 uppercase tracking-wider mb-1">Available Assets</p>
-                    <p className="text-xl text-emerald-400 font-bold">{nftStatus.preLaunch?.availableNFTs || 0}</p>
+                    <p className="text-xl text-emerald-400 font-bold">{availableNFTs}</p>
                   </div>
                   <div className="bg-black/50 border border-[#D4AF37]/20 rounded-xl p-4 text-center">
                     <p className="text-xs text-[#D4AF37]/60 uppercase tracking-wider mb-1">Sold Assets</p>
-                    <p className="text-xl text-[#F3C06A] font-bold">{500 - (nftStatus.preLaunch?.availableNFTs || 500)}</p>
+                    <p className="text-xl text-[#F3C06A] font-bold">{soldNFTs}</p>
                   </div>
                   <div className="bg-black/50 border border-[#D4AF37]/20 rounded-xl p-4 text-center">
                     <p className="text-xs text-[#D4AF37]/60 uppercase tracking-wider mb-1">Price Per Unit</p>
-                    <p className="text-xl text-[#F3C06A] font-bold">${nftStatus.preLaunch?.pricePerNFT || 10}</p>
+                    <p className="text-xl text-[#F3C06A] font-bold">${pricePerNFT}</p>
                   </div>
                 </div>
 
@@ -396,7 +457,7 @@ export default function NFTAdmin() {
                   </h4>
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-gray-500">Max Per User</span>
-                    <span className="text-sm text-white font-semibold">{nftStatus.preLaunch?.maxPerUser || 2} Units</span>
+                    <span className="text-sm text-white font-semibold">{maxPerUser} Units</span>
                   </div>
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-xs text-gray-500">Batch Density</span>
@@ -404,7 +465,11 @@ export default function NFTAdmin() {
                   </div>
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-xs text-gray-500">Total Batches</span>
-                    <span className="text-sm text-white font-semibold">125 Batches</span>
+                    <span className="text-sm text-white font-semibold">{totalBatches} Batches</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-xs text-gray-500">Total NFTs</span>
+                    <span className="text-sm text-white font-semibold">{totalNFTsFromAPI} NFTs</span>
                   </div>
                 </div>
               </div>
@@ -428,39 +493,43 @@ export default function NFTAdmin() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gradient-to-br from-[#D4AF37]/10 to-transparent border border-[#D4AF37]/30 rounded-xl p-5 text-center">
                     <p className="text-xs text-[#D4AF37] uppercase tracking-wider mb-1">Active Batch</p>
-                    <p className="text-3xl text-white font-bold">#{marketplace.currentBatch || 1}</p>
+                    <p className="text-3xl text-white font-bold">#{currentBatch}</p>
                   </div>
                   <div className="bg-gradient-to-br from-emerald-500/10 to-transparent border border-emerald-500/20 rounded-xl p-5 text-center">
                     <p className="text-xs text-emerald-400 uppercase tracking-wider mb-1">Batch Progress</p>
-                    <p className="text-3xl text-white font-bold">{marketplace.batchProgress || "0/4"}</p>
+                    <p className="text-3xl text-white font-bold">{batchProgress}</p>
                   </div>
                 </div>
 
                 <div className="relative pt-2">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs text-[#D4AF37] uppercase tracking-wider">Global Saturation</span>
-                    <span className="text-sm text-white font-bold">{marketplace?.currentBatch ? Math.round((marketplace.currentBatch / 125) * 100) : 0}%</span>
+                    <span className="text-sm text-white font-bold">{progressPercent}%</span>
                   </div>
                   <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gradient-to-r from-[#F3C06A] to-[#D4AF37] rounded-full transition-all duration-700"
-                      style={{ width: `${(marketplace.currentBatch / 125) * 100}%` }}
+                      style={{ width: `${progressPercent}%` }}
                     ></div>
                   </div>
                   <div className="flex justify-between mt-2">
                     <span className="text-[9px] text-gray-600 uppercase">Genesis</span>
-                    <span className="text-[9px] text-gray-600 uppercase">Saturation (125 Batches)</span>
+                    <span className="text-[9px] text-gray-600 uppercase">Saturation ({totalBatches} Batches)</span>
                   </div>
                 </div>
 
                 <div className="bg-black/50 rounded-xl p-4 mt-4">
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-gray-500">Remaining CryptoNest</span>
-                    <span className="text-sm text-emerald-400 font-bold">{nftStatus?.preLaunch?.availableNFTs || 500}</span>
+                    <span className="text-sm text-emerald-400 font-bold">{availableNFTs}</span>
                   </div>
                   <div className="flex justify-between items-center mt-2">
-                    <span className="text-xs text-gray-500">Total Revenue (Potential)</span>
-                    <span className="text-sm text-[#D4AF37] font-bold">${(500 - (nftStatus?.preLaunch?.availableNFTs || 500)) * (nftStatus?.preLaunch?.pricePerNFT || 10)}</span>
+                    <span className="text-xs text-gray-500">Sold CryptoNest</span>
+                    <span className="text-sm text-orange-400 font-bold">{soldNFTs}</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-xs text-gray-500">Total Revenue (Earned)</span>
+                    <span className="text-sm text-[#D4AF37] font-bold">${soldNFTs * pricePerNFT}</span>
                   </div>
                 </div>
               </div>
