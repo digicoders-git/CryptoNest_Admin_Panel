@@ -303,28 +303,37 @@ const UserManagement = () => {
     }]
   };
 
-  // Plan Distribution Chart
-  const planChart = {
-    chart: { type: 'column', backgroundColor: 'transparent' },
-    title: { text: '📊 User Plans Distribution', style: { color: '#FFD700', fontSize: '18px', fontWeight: 'bold' } },
-    xAxis: {
-      categories: ['Basic', 'Premium', 'Enterprise'],
-      labels: { style: { color: '#FFD700' } }
+  // Monthly Registrations Chart (last 6 months from table data)
+  const monthlyRegistrations = (() => {
+    const months = [];
+    const counts = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      months.push(d.toLocaleString('en-US', { month: 'short', year: '2-digit' }));
+      counts.push(users.filter(u => {
+        const c = new Date(u.createdAt);
+        return c.getMonth() === d.getMonth() && c.getFullYear() === d.getFullYear();
+      }).length);
+    }
+    return { months, counts };
+  })();
+
+  const registrationChart = {
+    chart: { type: 'areaspline', backgroundColor: 'transparent' },
+    title: { text: '📈 Monthly User Registrations', style: { color: '#FFD700', fontSize: '18px', fontWeight: 'bold' } },
+    xAxis: { categories: monthlyRegistrations.months, labels: { style: { color: '#FFD700' } }, lineColor: '#333', tickColor: '#333' },
+    yAxis: { title: { text: 'New Users', style: { color: '#FFD700' } }, labels: { style: { color: '#FFD700' } }, gridLineColor: '#333', allowDecimals: false },
+    tooltip: { backgroundColor: '#111', style: { color: '#FFD700' }, borderColor: '#FFD700' },
+    plotOptions: {
+      areaspline: {
+        lineWidth: 3,
+        marker: { radius: 6, fillColor: '#FFD700', lineColor: '#000', lineWidth: 2 },
+        fillColor: { linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 }, stops: [[0, 'rgba(255,215,0,0.35)'], [1, 'rgba(255,215,0,0)']] }
+      }
     },
-    yAxis: {
-      title: { text: 'Number of Users', style: { color: '#FFD700' } },
-      labels: { style: { color: '#FFD700' } },
-      gridLineColor: '#333'
-    },
-    series: [{
-      name: 'Users',
-      data: [
-        users.filter(u => u.currentPlan === 'basic').length,
-        users.filter(u => u.currentPlan === 'premium').length,
-        users.filter(u => u.currentPlan === 'enterprise').length
-      ],
-      color: '#FFD700'
-    }]
+    series: [{ name: 'Registrations', data: monthlyRegistrations.counts, color: '#FFD700' }],
+    credits: { enabled: false }
   };
 
   const getStatusBadge = (user) => {
@@ -434,7 +443,7 @@ const UserManagement = () => {
             <HighchartsReact highcharts={Highcharts} options={userChart} />
           </div>
           <div className="bg-gray-900/40 backdrop-blur-sm rounded-2xl p-4 border border-yellow-500/20">
-            <HighchartsReact highcharts={Highcharts} options={planChart} />
+            <HighchartsReact highcharts={Highcharts} options={registrationChart} />
           </div>
         </div>
 
@@ -487,7 +496,7 @@ const UserManagement = () => {
             <table className="w-full text-left min-w-[1400px]">
               <thead className="bg-black/50">
                 <tr className="border-b border-yellow-500/30">
-                  {['#', 'Name', 'Email', 'Mobile', 'Referral Code', 'Wallet Address', 'Plan', 'Password', 'Level', 'Status', 'Joined', 'Actions'].map(h => (
+                  {['#', 'Name', 'Email', 'Mobile', 'Referral Code', 'Wallet Address', 'Password', 'Level', 'Status', 'Joined', 'Actions'].map(h => (
                     <th key={h} className="p-4 text-yellow-500 font-semibold whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
@@ -495,7 +504,7 @@ const UserManagement = () => {
               <tbody>
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan="12" className="p-8 text-center text-gray-400">
+                    <td colSpan="11" className="p-8 text-center text-gray-400">
                       <FaUsers className="text-4xl mx-auto mb-2 opacity-30" />
                       No users found
                     </td>
@@ -521,12 +530,6 @@ const UserManagement = () => {
                         </td>
                         <td className="p-4">
                           <code className="text-xs font-mono text-gray-400 bg-gray-800 px-2 py-1 rounded max-w-[480px] block truncate">{user.walletAddress || '—'}</code>
-                        </td>
-                        <td className="p-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold capitalize ${user.currentPlan === 'premium' ? 'bg-yellow-500/20 text-yellow-400' :
-                            user.currentPlan === 'enterprise' ? 'bg-purple-500/20 text-purple-400' :
-                              'bg-gray-500/20 text-gray-400'
-                            }`}>{user.currentPlan || 'basic'}</span>
                         </td>
                         <td className="p-4">
                           <span className="text-xs font-mono text-gray-300 bg-gray-800 px-2 py-1 rounded">{user.password || '—'}</span>

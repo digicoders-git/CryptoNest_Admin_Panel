@@ -435,13 +435,13 @@ export default function RootWallet() {
   const transactionTypeChart = {
     chart: { type: "bar", backgroundColor: "transparent" },
     title: { text: "📋 Transaction Type Distribution", style: { color: "#D4AF37", fontSize: "16px", fontWeight: "bold" } },
-    xAxis: { categories: ["Registration", "NFT Sale", "Parent Payout", "Upgrade", "Other"], labels: { style: { color: "#D4AF37" } } },
+    xAxis: { categories: ["Registration", "NFT Sale", "Parent Payout", "Other"], labels: { style: { color: "#D4AF37" } } },
     yAxis: { title: { text: "Count", style: { color: "#D4AF37" } }, labels: { style: { color: "#D4AF37" } }, gridLineColor: "#333" },
     plotOptions: {
       bar: {
         dataLabels: { enabled: true, format: "{y}", style: { color: "#D4AF37" } },
         colorByPoint: true,
-        colors: ["#3B82F6", "#10B981", "#8B5CF6", "#F59E0B", "#6B7280"]
+        colors: ["#3B82F6", "#10B981", "#8B5CF6", "#6B7280"]
       }
     },
     series: [{
@@ -450,7 +450,6 @@ export default function RootWallet() {
         transactions.transactions.filter(tx => tx.type === "Registration").length,
         transactions.transactions.filter(tx => tx.type === "NFT Sale").length,
         transactions.transactions.filter(tx => tx.type === "Parent Payout").length,
-        transactions.transactions.filter(tx => tx.type === "Upgrade").length,
         transactions.transactions.filter(tx => tx.type === "Other").length
       ]
     }]
