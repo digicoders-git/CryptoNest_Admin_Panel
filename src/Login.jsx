@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 import { FaLock, FaEnvelope, FaRocket } from "react-icons/fa";
 import { generateAndSaveFCMToken } from "./config/firebase";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -18,7 +18,7 @@ export default function Login() {
 
     try {
       const response = await fetch(
-        `${API_URL}api/SuperAdmin/login`,
+        `${API_URL}/api/SuperAdmin/login`,
         {
           method: "POST",
           headers: {
