@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 
 export default function SystemSettings() {
   const [settings, setSettings] = useState({
@@ -28,7 +28,7 @@ export default function SystemSettings() {
 
       // Fetch company balance from working API
       const balanceRes = await axios.get(
-        `${API_URL}api/admin/company-balance`,
+        `${API_URL}admin/company-balance`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -40,7 +40,7 @@ export default function SystemSettings() {
 
       // Fetch users for stats
       const usersRes = await axios.get(
-        `${API_URL}api/auth/Getuser`,
+        `${API_URL}auth/Getuser`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },

@@ -16,7 +16,7 @@ import {
   FaEye
 } from 'react-icons/fa';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 
 const NFTUserTreeAnalysis = () => {
   const [loading, setLoading] = useState(false);
@@ -37,7 +37,7 @@ const NFTUserTreeAnalysis = () => {
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}api/nft-analytics/user-nft-tree-analysis`, {
+      const response = await fetch(`${API_URL}nft-analytics/user-nft-tree-analysis`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

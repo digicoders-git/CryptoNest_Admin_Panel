@@ -54,7 +54,7 @@ import {
   Treemap,
 } from "recharts";
 import Swal from "sweetalert2";
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 export default function MLMAnalyticsDashboard() {
   const [analyticsData, setAnalyticsData] = useState({
     overview: {},
@@ -97,7 +97,7 @@ export default function MLMAnalyticsDashboard() {
 
       // Fetch main data from SuperAdmin API (same as RootWallet)
       const transactionsRes = await axios.get(
-        `${API_URL}api/SuperAdmin/company-transactions`,
+        `${API_URL}SuperAdmin/company-transactions`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -107,7 +107,7 @@ export default function MLMAnalyticsDashboard() {
       // Fetch users data (same as RootWallet)
       let usersData = [];
       try {
-        const usersRes = await axios.get(`${API_URL}api/admin/users`, {
+        const usersRes = await axios.get(`${API_URL}admin/users`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (usersRes.data.success) {

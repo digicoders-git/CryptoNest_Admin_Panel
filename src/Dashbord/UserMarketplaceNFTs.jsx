@@ -25,7 +25,7 @@ import {
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 
 export default function UserMarketplaceNFTs() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,7 +48,7 @@ export default function UserMarketplaceNFTs() {
     try {
       setLoading(true);
       const response = await fetch(
-        `${API_URL}api/nft-transactions/marketplace/${searchQuery.trim()}`
+        `${API_URL}nft-transactions/marketplace/${searchQuery.trim()}`
       );
       const result = await response.json();
 

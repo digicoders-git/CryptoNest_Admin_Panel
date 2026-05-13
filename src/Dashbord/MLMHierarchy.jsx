@@ -21,7 +21,7 @@ import {
   FaEnvira
 } from 'react-icons/fa';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 
 const MLMHierarchyDashboard = () => {
   const [hierarchy, setHierarchy] = useState([]);
@@ -45,7 +45,7 @@ const MLMHierarchyDashboard = () => {
   const fetchHierarchy = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}api/mlm/hierarchy`);
+      const response = await fetch(`${API_URL}mlm/hierarchy`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const result = await response.json();
 
@@ -73,7 +73,7 @@ const MLMHierarchyDashboard = () => {
 
     setTreeLoading(true);
     try {
-      const response = await fetch(`${API_URL}api/mlm/user-tree/${userId}`);
+      const response = await fetch(`${API_URL}mlm/user-tree/${userId}`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const result = await response.json();
 

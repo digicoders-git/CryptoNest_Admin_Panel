@@ -29,7 +29,7 @@ import {
 import Swal from "sweetalert2";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -53,7 +53,7 @@ export default function Profile() {
     try {
       setLoading(true);
       const token = getAuthToken();
-      const response = await axios.get(`${API_URL}api/SuperAdmin/profile`, {
+      const response = await axios.get(`${API_URL}SuperAdmin/profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -86,7 +86,7 @@ export default function Profile() {
       setUpdating(true);
       const token = getAuthToken();
       const response = await axios.put(
-        `${API_URL}api/SuperAdmin/profile`,
+        `${API_URL}SuperAdmin/profile`,
         formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );

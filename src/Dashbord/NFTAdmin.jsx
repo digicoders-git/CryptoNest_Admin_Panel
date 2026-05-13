@@ -21,7 +21,7 @@ import Swal from "sweetalert2";
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 
 export default function NFTAdmin() {
   const [loading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ export default function NFTAdmin() {
 
   const apiCall = async (endpoint, method = "GET", body = null) => {
     try {
-      const response = await fetch(`${API_URL}api/nft${endpoint}`, {
+      const response = await fetch(`${API_URL}nft${endpoint}`, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -134,7 +134,7 @@ export default function NFTAdmin() {
   const fetchNFTTransactions = async () => {
     const token = localStorage.getItem("token") || localStorage.getItem("superAdminToken");
     try {
-      const res = await fetch(`${API_URL}api/SuperAdmin/company-transactions`, {
+      const res = await fetch(`${API_URL}SuperAdmin/company-transactions`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();

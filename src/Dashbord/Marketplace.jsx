@@ -23,7 +23,7 @@ import {
   FaHourglassHalf
 } from 'react-icons/fa';
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 
 const NFTMarketplaceDashboard = () => {
   const [marketplaceData, setMarketplaceData] = useState(null);
@@ -38,7 +38,7 @@ const NFTMarketplaceDashboard = () => {
   const fetchMarketplaceNFTs = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}api/nft/marketplace`);
+      const response = await fetch(`${API_URL}nft/marketplace`);
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 

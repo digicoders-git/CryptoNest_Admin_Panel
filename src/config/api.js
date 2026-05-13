@@ -1,7 +1,8 @@
 // API Configuration
+const rawUrl = import.meta.env.VITE_API_BASE_URL || "https://cryptonest-backend.onrender.com";
 const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || "https://api.gtnworld.live",
-  VERSION: import.meta.env.VITE_API_VERSION || "api",
+  BASE_URL: rawUrl.replace(/\/$/, '').replace(/\/api$/, '') + '/api',
+  VERSION: "",
 };
 
 // Complete API Endpoints - Based on Backend Flow Documentation

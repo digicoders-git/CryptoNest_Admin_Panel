@@ -34,8 +34,8 @@ export const generateAndSaveFCMToken = async (authToken) => {
     console.log('✅ FCM Token generated:', fcmToken);
 
     // Backend pe save karo
-    const API_URL = import.meta.env.VITE_API_URL;
-    await fetch(`${API_URL}api/SuperAdmin/fcm-token`, {
+    const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
+    await fetch(`${API_URL}SuperAdmin/fcm-token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

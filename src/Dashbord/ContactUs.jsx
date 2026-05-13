@@ -26,13 +26,13 @@ const ContactManagement = () => {
     description: ''
   });
 
-  const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 
   // Fetch all contacts
   const fetchContacts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}api/contacts`);
+      const response = await fetch(`${API_URL}contacts`);
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
@@ -79,7 +79,7 @@ const ContactManagement = () => {
   // Create contact
   const handleCreate = async () => {
     try {
-      const response = await fetch(`${API_URL}api/contacts`, {
+      const response = await fetch(`${API_URL}contacts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -103,7 +103,7 @@ const ContactManagement = () => {
   // Update contact
   const handleUpdate = async () => {
     try {
-      const response = await fetch(`${API_URL}api/contacts/${selectedContact._id}`, {
+      const response = await fetch(`${API_URL}contacts/${selectedContact._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -131,7 +131,7 @@ const ContactManagement = () => {
     });
     if (!confirm.isConfirmed) return;
     try {
-      const response = await fetch(`${API_URL}api/contacts/${id}`, { method: 'DELETE' });
+      const response = await fetch(`${API_URL}contacts/${id}`, { method: 'DELETE' });
       const result = await response.json();
       if (result.success) {
         Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Contact deleted successfully', background: '#000', color: '#D4AF37', confirmButtonColor: '#D4AF37' });

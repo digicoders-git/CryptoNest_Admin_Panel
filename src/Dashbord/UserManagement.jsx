@@ -35,7 +35,7 @@ const UserManagement = () => {
     totalBalance: 0
   });
 
-  const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 
   // Get token
   const getToken = () => {
@@ -47,7 +47,7 @@ const UserManagement = () => {
     try {
       setLoading(true);
       const token = getToken();
-      const response = await fetch(`${API_URL}api/SuperAdmin/users`, {
+      const response = await fetch(`${API_URL}SuperAdmin/users`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -81,7 +81,7 @@ const UserManagement = () => {
     try {
       setLoading(true);
       const token = getToken();
-      const response = await fetch(`${API_URL}api/SuperAdmin/users?search=${encodeURIComponent(searchTerm)}`, {
+      const response = await fetch(`${API_URL}SuperAdmin/users?search=${encodeURIComponent(searchTerm)}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -147,7 +147,7 @@ const UserManagement = () => {
     setActionLoading(id);
     try {
       const token = getToken();
-      const response = await fetch(`${API_URL}api/SuperAdmin/users/${id}/activate`, {
+      const response = await fetch(`${API_URL}SuperAdmin/users/${id}/activate`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -172,7 +172,7 @@ const UserManagement = () => {
     setActionLoading(id);
     try {
       const token = getToken();
-      const response = await fetch(`${API_URL}api/SuperAdmin/users/${id}/deactivate`, {
+      const response = await fetch(`${API_URL}SuperAdmin/users/${id}/deactivate`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -204,7 +204,7 @@ const UserManagement = () => {
     setActionLoading(id);
     try {
       const token = getToken();
-      const response = await fetch(`${API_URL}api/SuperAdmin/users/${id}`, {
+      const response = await fetch(`${API_URL}SuperAdmin/users/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -229,7 +229,7 @@ const UserManagement = () => {
     setActionLoading(id);
     try {
       const token = getToken();
-      const response = await fetch(`${API_URL}api/SuperAdmin/users/${id}`, {
+      const response = await fetch(`${API_URL}SuperAdmin/users/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

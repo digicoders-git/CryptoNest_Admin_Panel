@@ -19,7 +19,7 @@ import {
 import Swal from "sweetalert2";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 
 export default function ChangePassword() {
   const [formData, setFormData] = useState({
@@ -105,7 +105,7 @@ export default function ChangePassword() {
       const token = localStorage.getItem("token") || localStorage.getItem("superAdminToken");
 
       const response = await axios.put(
-        `${API_URL}api/SuperAdmin/change-password`,
+        `${API_URL}SuperAdmin/change-password`,
         {
           email: formData.email,
           currentPassword: formData.currentPassword,

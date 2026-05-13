@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 
 export default function NotificationManagement() {
   const [notifications, setNotifications] = useState([]);
@@ -34,7 +34,7 @@ export default function NotificationManagement() {
     try {
       setLoading(true);
       const token = getAuthToken();
-      const response = await fetch(`${API_URL}api/notifications/all`, {
+      const response = await fetch(`${API_URL}notifications/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const result = await response.json();
@@ -70,7 +70,7 @@ export default function NotificationManagement() {
 
     try {
       const token = getAuthToken();
-      const response = await fetch(`${API_URL}api/notifications/create`, {
+      const response = await fetch(`${API_URL}notifications/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -110,7 +110,7 @@ export default function NotificationManagement() {
   const updateNotification = async () => {
     try {
       const token = getAuthToken();
-      const response = await fetch(`${API_URL}api/notifications/update/${currentNotification._id}`, {
+      const response = await fetch(`${API_URL}notifications/update/${currentNotification._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -158,7 +158,7 @@ export default function NotificationManagement() {
     if (confirm.isConfirmed) {
       try {
         const token = getAuthToken();
-        const response = await fetch(`${API_URL}api/notifications/delete/${id}`, {
+        const response = await fetch(`${API_URL}notifications/delete/${id}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -177,7 +177,7 @@ export default function NotificationManagement() {
   const toggleNotification = async (id) => {
     try {
       const token = getAuthToken();
-      const response = await fetch(`${API_URL}api/notifications/toggle/${id}`, {
+      const response = await fetch(`${API_URL}notifications/toggle/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

@@ -42,7 +42,7 @@ import HighchartsReact from 'highcharts-react-official';
 import axios from "axios";
 import Swal from "sweetalert2";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 
 export default function RootWallet() {
   const [companyData, setCompanyData] = useState({
@@ -105,7 +105,7 @@ export default function RootWallet() {
 
       if (!token) return;
 
-      const response = await axios.get(`${API_URL}api/admin/users`, {
+      const response = await axios.get(`${API_URL}admin/users`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -115,7 +115,7 @@ export default function RootWallet() {
         );
         setUsers(sortedUsers);
         const transactionRes = await axios.get(
-          `${API_URL}api/SuperAdmin/company-transactions`,
+          `${API_URL}SuperAdmin/company-transactions`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -150,7 +150,7 @@ export default function RootWallet() {
       }
 
       const transactionRes = await axios.get(
-        `${API_URL}api/SuperAdmin/company-transactions`,
+        `${API_URL}SuperAdmin/company-transactions`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },

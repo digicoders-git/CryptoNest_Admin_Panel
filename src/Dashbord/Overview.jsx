@@ -10,14 +10,14 @@ const MasterDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastRefresh, setLastRefresh] = useState(new Date());
-  const baseUrl = import.meta.env.VITE_API_URL;
+  const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '').replace(/\/api$/, '') + '/api/';
 
   // API se data fetch karne ka function
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token') || localStorage.getItem('superAdminToken');
-      const response = await fetch(`${baseUrl}api/SuperAdmin/master-dashboard`, {
+      const response = await fetch(`${baseUrl}SuperAdmin/master-dashboard`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

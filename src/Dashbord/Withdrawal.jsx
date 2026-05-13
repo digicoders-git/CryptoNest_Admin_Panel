@@ -28,7 +28,7 @@ const WithdrawalManagement = () => {
   });
   const [dailyData, setDailyData] = useState([]);
 
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 
   // Get token
   const getToken = () => {
@@ -40,7 +40,7 @@ const WithdrawalManagement = () => {
     try {
       setLoading(true);
       const token = getToken();
-      const response = await fetch(`${baseUrl}api/admin/withdrawals`, {
+      const response = await fetch(`${baseUrl}admin/withdrawals`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -109,7 +109,7 @@ const WithdrawalManagement = () => {
     setActionLoading(id);
     try {
       const token = getToken();
-      const response = await fetch(`${baseUrl}api/admin/withdrawals/${id}/approve`, {
+      const response = await fetch(`${baseUrl}admin/withdrawals/${id}/approve`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ const WithdrawalManagement = () => {
     setActionLoading(id);
     try {
       const token = getToken();
-      const response = await fetch(`${baseUrl}api/admin/withdrawals/${id}/reject`, {
+      const response = await fetch(`${baseUrl}admin/withdrawals/${id}/reject`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

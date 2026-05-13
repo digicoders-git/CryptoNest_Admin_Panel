@@ -21,7 +21,7 @@ import {
   FaArrowDown
 } from 'react-icons/fa';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
 
 const NFTTransactionsDashboard = () => {
   const [transactions, setTransactions] = useState(null);
@@ -36,7 +36,7 @@ const NFTTransactionsDashboard = () => {
   const fetchAllTransactions = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}api/nft-transactions/all`);
+      const response = await fetch(`${API_URL}nft-transactions/all`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const result = await response.json();
 
@@ -58,7 +58,7 @@ const NFTTransactionsDashboard = () => {
 
     setUserLoading(true);
     try {
-      const response = await fetch(`${API_URL}api/nft-transactions/user/${encodeURIComponent(query)}`);
+      const response = await fetch(`${API_URL}nft-transactions/user/${encodeURIComponent(query)}`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const result = await response.json();
 
