@@ -73,7 +73,8 @@ export const API_ENDPOINTS = {
 
 // Build complete API URL
 export const buildApiUrl = (endpoint) => {
-  return `${API_CONFIG.BASE_URL}/${API_CONFIG.VERSION}${endpoint}`;
+  const base = API_CONFIG.BASE_URL.replace(/\/$/, '');
+  return `${base}/${API_CONFIG.VERSION}${endpoint}`;
 };
 
 // Get auth token with fallback
