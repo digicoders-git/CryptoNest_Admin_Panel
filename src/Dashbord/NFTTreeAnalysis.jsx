@@ -16,7 +16,7 @@ import {
   FaEye
 } from 'react-icons/fa';
 
-const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '').replace(/\/api$/, '') + '/api/';
 
 const NFTUserTreeAnalysis = () => {
   const [loading, setLoading] = useState(false);

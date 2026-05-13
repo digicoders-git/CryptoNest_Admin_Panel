@@ -23,7 +23,7 @@ import {
   FaHourglassHalf
 } from 'react-icons/fa';
 
-const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '').replace(/\/api$/, '') + '/api/';
 
 const NFTMarketplaceDashboard = () => {
   const [marketplaceData, setMarketplaceData] = useState(null);

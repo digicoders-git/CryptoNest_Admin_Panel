@@ -29,7 +29,7 @@ import {
 import Swal from "sweetalert2";
 import axios from "axios";
 
-const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
+const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '').replace(/\/api$/, '') + '/api/';
 
 export default function Profile() {
   const navigate = useNavigate();

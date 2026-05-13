@@ -28,7 +28,7 @@ const WithdrawalManagement = () => {
   });
   const [dailyData, setDailyData] = useState([]);
 
-  const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '') + '/api/';
+  const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '').replace(/\/api$/, '') + '/api/';
 
   // Get token
   const getToken = () => {
