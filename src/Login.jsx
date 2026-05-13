@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 import { FaLock, FaEnvelope, FaRocket } from "react-icons/fa";
 import { generateAndSaveFCMToken } from "./config/firebase";
 
-const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+const API_URL = (import.meta.env.VITE_API_URL || 'https://cryptonest-backend.onrender.com').replace(/\/$/, '').replace(/\/api$/, '');
 
 export default function Login() {
   const [email, setEmail] = useState("");
