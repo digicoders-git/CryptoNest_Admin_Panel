@@ -412,24 +412,7 @@ export default function Profile() {
               </div>
             </div>
 
-            {/* Quick Access Card */}
-            <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-500/20 rounded-2xl p-6">
-              <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                <FaKey className="text-yellow-500" /> Quick Terminals
-              </h3>
-              <div className="space-y-3">
-                <button
-                  onClick={() => navigate("/Dashbord/change-password")}
-                  className="w-full p-3 bg-gray-800/30 border border-gray-700 rounded-xl flex items-center justify-between hover:bg-gray-800/50 hover:border-yellow-500/30 transition-all group"
-                >
-                  <div className="flex items-center gap-3">
-                    <FaKey className="text-yellow-500 text-sm" />
-                    <span className="text-white text-sm">Change Security Key</span>
-                  </div>
-                  <FaChartPie className="text-gray-500 group-hover:text-yellow-500 transition-colors text-xs" />
-                </button>
-              </div>
-            </div>
+
 
             {/* Session Info Card */}
             <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-500/20 rounded-2xl p-6">

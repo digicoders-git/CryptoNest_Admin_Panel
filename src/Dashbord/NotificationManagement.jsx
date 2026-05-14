@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 import {
   FaBell, FaPlus, FaEdit, FaTrash, FaToggleOn, FaToggleOff,
   FaSync, FaBullhorn, FaInfoCircle, FaExclamationTriangle,
@@ -10,6 +12,33 @@ import {
 import Swal from "sweetalert2";
 
 const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '').replace(/\/api$/, '') + '/api/';
+
+// Rich Text Editor Configuration
+const QUILL_MODULES = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+    [{ 'font': [] }],
+    [{ 'size': ['small', false, 'large', 'huge'] }],
+    ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'script': 'sub'}, { 'script': 'super' }],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    [{ 'indent': '-1'}, { 'indent': '+1' }],
+    [{ 'align': [] }],
+    ['link', 'image', 'video'],
+    ['clean']
+  ],
+};
+
+const QUILL_FORMATS = [
+  'header', 'font', 'size',
+  'bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block',
+  'color', 'background',
+  'script',
+  'list', 'bullet', 'indent',
+  'align',
+  'link', 'image', 'video'
+];
 
 export default function NotificationManagement() {
   const [notifications, setNotifications] = useState([]);
@@ -321,6 +350,8 @@ export default function NotificationManagement() {
     }]
   };
 
+
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center">
@@ -467,7 +498,10 @@ export default function NotificationManagement() {
                     </div>
 
                     {/* Message */}
-                    <p className="text-gray-400 text-sm leading-relaxed">{notification.message}</p>
+                    <div 
+                      className="text-gray-400 text-sm leading-relaxed quill-content" 
+                      dangerouslySetInnerHTML={{ __html: notification.message }}
+                    />
 
                     {/* Footer Meta */}
                     <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-gray-800 text-[10px] text-gray-500">
@@ -520,7 +554,7 @@ export default function NotificationManagement() {
         {/* Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fadeIn">
-            <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-500/30 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-500/30 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-y-auto">
               <div className="sticky top-0 bg-black/50 p-5 border-b border-yellow-500/20 flex justify-between items-center">
                 <h2 className="text-xl font-bold text-yellow-500">
                   {editMode ? "Modify Configuration" : "New Transmission"}
@@ -540,13 +574,15 @@ export default function NotificationManagement() {
                     className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:border-yellow-500 focus:outline-none"
                   />
                 </div>
-                <div>
+                <div className="quill-dark">
                   <label className="block text-gray-400 text-xs mb-1">Message</label>
-                  <textarea
+                  <ReactQuill 
+                    theme="snow"
                     value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    rows="5"
-                    className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:border-yellow-500 focus:outline-none resize-none"
+                    onChange={(content) => setFormData({ ...formData, message: content })}
+                    modules={QUILL_MODULES}
+                    formats={QUILL_FORMATS}
+                    className="bg-gray-800 text-white rounded-xl border border-gray-700 focus-within:border-yellow-500 overflow-hidden"
                     placeholder="Enter broadcast content..."
                   />
                 </div>
@@ -610,6 +646,56 @@ export default function NotificationManagement() {
         }
         .animate-fadeIn {
           animation: fadeIn 0.2s ease-out;
+        }
+        /* Quill Dark Mode Overrides */
+        .quill-dark .ql-toolbar {
+          background-color: #1f2937;
+          border-color: #374151;
+          border-top-left-radius: 0.75rem;
+          border-top-right-radius: 0.75rem;
+        }
+        .quill-dark .ql-toolbar .ql-stroke {
+          stroke: #d1d5db;
+        }
+        .quill-dark .ql-toolbar .ql-fill {
+          fill: #d1d5db;
+        }
+        .quill-dark .ql-toolbar .ql-picker {
+          color: #d1d5db;
+        }
+        .quill-dark .ql-container {
+          border-color: #374151;
+          border-bottom-left-radius: 0.75rem;
+          border-bottom-right-radius: 0.75rem;
+          min-height: 400px;
+          font-size: 0.875rem;
+        }
+        .quill-dark .ql-editor {
+          min-height: 400px;
+        }
+        /* Feed Content Styling */
+        .quill-content h1, .quill-content h2, .quill-content h3 {
+          color: #f3f4f6;
+          margin-top: 0.5em;
+          margin-bottom: 0.5em;
+          font-weight: 600;
+        }
+        .quill-content a {
+          color: #eab308;
+          text-decoration: underline;
+        }
+        .quill-content p {
+          margin-bottom: 0.5em;
+        }
+        .quill-content ul {
+          list-style-type: disc;
+          padding-left: 1.5em;
+          margin-bottom: 0.5em;
+        }
+        .quill-content ol {
+          list-style-type: decimal;
+          padding-left: 1.5em;
+          margin-bottom: 0.5em;
         }
       `}</style>
     </div>

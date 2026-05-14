@@ -1,5 +1,6 @@
 import {
   FaWallet,
+  FaCheckCircle,
   FaArrowUp,
   FaArrowDown,
   FaSync,
@@ -242,13 +243,7 @@ export default function RootWallet() {
   // Calculate totals for cards
   const adminNftTotal = useMemo(() => {
     return transactions.transactions
-      .filter(
-        (tx) =>
-          tx.type === "Other" &&
-          (tx.description?.toLowerCase().includes("nft") ||
-            tx.description?.toLowerCase().includes("admin nft") ||
-            tx.description?.toLowerCase().includes("nft sale")),
-      )
+      .filter((tx) => tx.type === "Admin NFT Sold")
       .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
   }, [transactions.transactions]);
 
@@ -286,6 +281,12 @@ export default function RootWallet() {
       .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
   }, [transactions.transactions]);
 
+  const withdrawalApprovedTotal = useMemo(() => {
+    return transactions.transactions
+      .filter((tx) => tx.type === "Withdrawal Approved")
+      .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
+  }, [transactions.transactions]);
+
   // Filter transactions based on tab
   const getFilteredByTab = () => {
     let filtered = [...transactions.transactions];
@@ -299,6 +300,8 @@ export default function RootWallet() {
         filtered = filtered.filter((tx) => tx.type === "NFT Sale");
       } else if (transactionFilterTab === "Upgrade") {
         filtered = filtered.filter((tx) => tx.type === "Upgrade");
+      } else if (transactionFilterTab === "Withdrawal Approved") {
+        filtered = filtered.filter((tx) => tx.type === "Withdrawal Approved");
       } else if (transactionFilterTab === "Other") {
         filtered = filtered.filter((tx) => tx.type === "Other");
       }
@@ -373,8 +376,10 @@ export default function RootWallet() {
 
   const totalIncome = transactions.summary?.totalIncome || 0;
   const totalPayouts = transactions.summary?.totalPayouts || 0;
-  const netProfit = totalIncome - totalPayouts - adminNftTotal - nftSaleTotal - upgradeTotal - missedParentBonusTotal;
   const totalRegistrations = transactions.transactions.filter(tx => tx.type === "Registration").reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+  const registrationProfit = totalRegistrations - totalPayouts;
+  const netProfit = totalIncome - totalPayouts - adminNftTotal - nftSaleTotal - upgradeTotal - missedParentBonusTotal;
+  const companyNetProfit = (totalRegistrations + nftSaleTotal + adminNftTotal) - totalPayouts - withdrawalApprovedTotal;
 
   // Highcharts - Revenue Breakdown Chart
   const revenueBreakdownChart = {
@@ -518,7 +523,67 @@ export default function RootWallet() {
           </div>
         </div>
 
-        {/* Card 2: Total Payouts */}
+        {/* Card 10: Company Net Profit */}
+        <div className="bg-gradient-to-br from-gray-900 to-black border border-[#D4AF37]/30 rounded-2xl p-4 hover:scale-[1.02] transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-[#D4AF37]/10 rounded-xl">
+              <FaChartLine className="text-lg text-[#D4AF37]" />
+            </div>
+            <span className="text-[8px] font-black text-[#D4AF37]/60 bg-[#D4AF37]/10 px-2 py-0.5 rounded-full">Net</span>
+          </div>
+          <p className="text-[#D4AF37]/50 text-[9px] uppercase font-bold tracking-wider">Company Net Profit</p>
+          <h3 className="text-xl md:text-2xl font-black text-white mt-1">{formatCurrency(companyNetProfit)}</h3>
+          <div className="mt-2 h-0.5 bg-[#D4AF37]/20 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-[#F3C06A] to-[#D4AF37] rounded-full w-full"></div>
+          </div>
+        </div>
+
+        {/* Card 4: Registration Profit */}
+        <div className="bg-gradient-to-br from-gray-900 to-black border border-[#D4AF37]/30 rounded-2xl p-4 hover:scale-[1.02] transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-[#D4AF37]/10 rounded-xl">
+              <FaUsers className="text-lg text-[#D4AF37]" />
+            </div>
+            <span className="text-[8px] font-black text-[#D4AF37]/60 bg-[#D4AF37]/10 px-2 py-0.5 rounded-full">Reg</span>
+          </div>
+          <p className="text-[#D4AF37]/50 text-[9px] uppercase font-bold tracking-wider">Registration Profit</p>
+          <h3 className="text-xl md:text-2xl font-black text-white mt-1">{formatCurrency(registrationProfit > 0 ? registrationProfit : 0)}</h3>
+          <div className="mt-2 h-0.5 bg-[#D4AF37]/20 rounded-full overflow-hidden">
+            <div className="h-full bg-[#3B82F6] rounded-full" style={{ width: totalRegistrations ? `${(registrationProfit / totalRegistrations) * 100}%` : "0%" }}></div>
+          </div>
+        </div>
+
+        {/* Card 9: Total NFT Profit (NEW) */}
+        <div className="bg-gradient-to-br from-gray-900 to-black border border-[#D4AF37]/30 rounded-2xl p-4 hover:scale-[1.02] transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-[#D4AF37]/10 rounded-xl">
+              <FaGem className="text-lg text-[#D4AF37]" />
+            </div>
+            <span className="text-[8px] font-black text-[#D4AF37]/60 bg-[#D4AF37]/10 px-2 py-0.5 rounded-full">NFT</span>
+          </div>
+          <p className="text-[#D4AF37]/50 text-[9px] uppercase font-bold tracking-wider">Total NFT Profit</p>
+          <h3 className="text-xl md:text-2xl font-black text-white mt-1">{formatCurrency(adminNftTotal + nftSaleTotal)}</h3>
+          <div className="mt-3 h-0.5 bg-[#D4AF37]/20 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-[#10B981] to-[#F59E0B] rounded-full w-full"></div>
+          </div>
+        </div>
+
+        {/* Card 2: Registrations */}
+        <div className="bg-gradient-to-br from-gray-900 to-black border border-[#D4AF37]/30 rounded-2xl p-4 hover:scale-[1.02] transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-[#D4AF37]/10 rounded-xl">
+              <FaUsers className="text-lg text-[#D4AF37]" />
+            </div>
+            <span className="text-[8px] font-black text-[#D4AF37]/60 bg-[#D4AF37]/10 px-2 py-0.5 rounded-full">{transactions.transactions.filter(t => t.type === "Registration").length} TX</span>
+          </div>
+          <p className="text-[#D4AF37]/50 text-[9px] uppercase font-bold tracking-wider">Registrations</p>
+          <h3 className="text-xl md:text-2xl font-black text-white mt-1">{formatCurrency(totalRegistrations)}</h3>
+          <div className="mt-2 h-0.5 bg-[#D4AF37]/20 rounded-full overflow-hidden">
+            <div className="h-full bg-[#3B82F6] rounded-full w-full"></div>
+          </div>
+        </div>
+
+        {/* Card 3: Total Payouts */}
         <div className="bg-gradient-to-br from-gray-900 to-black border border-[#D4AF37]/30 rounded-2xl p-4 hover:scale-[1.02] transition-all duration-300">
           <div className="flex items-center justify-between mb-3">
             <div className="p-2 bg-[#D4AF37]/10 rounded-xl">
@@ -533,22 +598,7 @@ export default function RootWallet() {
           </div>
         </div>
 
-        {/* Card 3: Net Profit */}
-        <div className="bg-gradient-to-br from-gray-900 to-black border border-[#D4AF37]/30 rounded-2xl p-4 hover:scale-[1.02] transition-all duration-300">
-          <div className="flex items-center justify-between mb-3">
-            <div className="p-2 bg-[#D4AF37]/10 rounded-xl">
-              <FaHandHoldingUsd className="text-lg text-[#D4AF37]" />
-            </div>
-            <span className="text-[8px] font-black text-[#D4AF37]/60 bg-[#D4AF37]/10 px-2 py-0.5 rounded-full">Actual</span>
-          </div>
-          <p className="text-[#D4AF37]/50 text-[9px] uppercase font-bold tracking-wider">Net Profit</p>
-          <h3 className="text-xl md:text-2xl font-black text-white mt-1">{formatCurrency(netProfit > 0 ? netProfit : 0)}</h3>
-          <div className="mt-2 h-0.5 bg-[#D4AF37]/20 rounded-full overflow-hidden">
-            <div className="h-full bg-[#10B981] rounded-full" style={{ width: totalIncome ? `${(netProfit / totalIncome) * 100}%` : "0%" }}></div>
-          </div>
-        </div>
-
-        {/* Card 4: Total Users */}
+        {/* Card 5: Total Users */}
         <div className="bg-gradient-to-br from-gray-900 to-black border border-[#D4AF37]/30 rounded-2xl p-4 hover:scale-[1.02] transition-all duration-300">
           <div className="flex items-center justify-between mb-3">
             <div className="p-2 bg-[#D4AF37]/10 rounded-xl">
@@ -562,34 +612,54 @@ export default function RootWallet() {
             <div className="h-full bg-[#3B82F6] rounded-full w-full"></div>
           </div>
         </div>
-      </div>
 
-      {/* ==================== BREAKOUT CARDS (Small Cards) ==================== */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-        {[
-          { type: "Registration", icon: FaUsers, amount: totalRegistrations, count: transactions.transactions.filter(t => t.type === "Registration").length, label: "Registrations", bar: "#3B82F6" },
-          { type: "NFT Sale", icon: FaGem, amount: nftSaleTotal, count: transactions.transactions.filter(t => t.type === "NFT Sale").length, label: "NFT Sales", bar: "#10B981" },
-          { type: "Admin NFT", icon: FaCrown, amount: adminNftTotal, count: transactions.transactions.filter(t => t.type === "Other" && t.description?.toLowerCase().includes("nft")).length, label: "Admin NFTs", bar: "#F59E0B" },
-          { type: "Other", icon: FaReceipt, amount: otherTotal, count: transactions.transactions.filter(t => t.type === "Other" && !t.description?.toLowerCase().includes("nft")).length, label: "Misc", bar: "#6B7280" }
-        ].map((card) => (
-          <div
-            key={card.type}
-            onClick={() => setTransactionFilterTab(card.type === "Admin NFT" ? "Other" : card.type)}
-            className={`bg-gradient-to-br from-gray-900 to-black border ${transactionFilterTab === (card.type === "Admin NFT" ? "Other" : card.type) ? "border-[#D4AF37] ring-1 ring-[#D4AF37]/50" : "border-[#D4AF37]/30"} rounded-2xl p-4 cursor-pointer hover:scale-[1.02] transition-all duration-300`}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 bg-[#D4AF37]/10 rounded-xl">
-                <card.icon className="text-lg text-[#D4AF37]" />
-              </div>
-              <span className="text-[8px] font-black text-[#D4AF37]/60 bg-[#D4AF37]/10 px-2 py-0.5 rounded-full">{card.count} TX</span>
+        {/* Card 6: Admin NFT Sold */}
+        <div className="bg-gradient-to-br from-gray-900 to-black border border-[#D4AF37]/30 rounded-2xl p-4 hover:scale-[1.02] transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-[#D4AF37]/10 rounded-xl">
+              <FaCrown className="text-lg text-[#D4AF37]" />
             </div>
-            <p className="text-[#D4AF37]/50 text-[9px] uppercase font-bold tracking-wider">{card.label}</p>
-            <h3 className="text-xl md:text-2xl font-black text-white mt-1">{formatCurrency(card.amount)}</h3>
-            <div className="mt-2 h-0.5 bg-[#D4AF37]/20 rounded-full overflow-hidden">
-              <div className="h-full rounded-full w-full" style={{ backgroundColor: card.bar }}></div>
-            </div>
+            <span className="text-[8px] font-black text-[#D4AF37]/60 bg-[#D4AF37]/10 px-2 py-0.5 rounded-full">{transactions.transactions.filter(t => t.type === "Admin NFT Sold").length} TX</span>
           </div>
-        ))}
+          <p className="text-[#D4AF37]/50 text-[9px] uppercase font-bold tracking-wider">Admin NFT Sold</p>
+          <h3 className="text-xl md:text-2xl font-black text-white mt-1">{formatCurrency(adminNftTotal)}</h3>
+          <div className="mt-2 h-0.5 bg-[#D4AF37]/20 rounded-full overflow-hidden">
+            <div className="h-full bg-[#F59E0B] rounded-full w-full"></div>
+          </div>
+        </div>
+
+        {/* Card 7: NFT Sale */}
+        <div className="bg-gradient-to-br from-gray-900 to-black border border-[#D4AF37]/30 rounded-2xl p-4 hover:scale-[1.02] transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-[#D4AF37]/10 rounded-xl">
+              <FaGem className="text-lg text-[#D4AF37]" />
+            </div>
+            <span className="text-[8px] font-black text-[#D4AF37]/60 bg-[#D4AF37]/10 px-2 py-0.5 rounded-full">{transactions.transactions.filter(t => t.type === "NFT Sale").length} TX</span>
+          </div>
+          <p className="text-[#D4AF37]/50 text-[9px] uppercase font-bold tracking-wider">NFT Sale</p>
+          <h3 className="text-xl md:text-2xl font-black text-white mt-1">{formatCurrency(transactions.transactions.filter(t => t.type === "NFT Sale").reduce((sum, t) => sum + Math.abs(t.amount || 0), 0))}</h3>
+          <div className="mt-2 h-0.5 bg-[#D4AF37]/20 rounded-full overflow-hidden">
+            <div className="h-full bg-[#10B981] rounded-full w-full"></div>
+          </div>
+        </div>
+        {/* Card 8: Withdrawal Approved */}
+        <div className="bg-gradient-to-br from-gray-900 to-black border border-[#D4AF37]/30 rounded-2xl p-4 hover:scale-[1.02] transition-all duration-300">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-2 bg-[#D4AF37]/10 rounded-xl">
+              <FaCheckCircle className="text-lg text-[#D4AF37]" />
+            </div>
+            <span className="text-[8px] font-black text-[#D4AF37]/60 bg-[#D4AF37]/10 px-2 py-0.5 rounded-full">Approved</span>
+          </div>
+          <p className="text-[#D4AF37]/50 text-[9px] uppercase font-bold tracking-wider">Withdrawal Approved</p>
+          <h3 className="text-xl md:text-2xl font-black text-white mt-1">{formatCurrency(withdrawalApprovedTotal)}</h3>
+          <div className="mt-2 h-0.5 bg-[#D4AF37]/20 rounded-full overflow-hidden">
+            <div className="h-full bg-[#10B981] rounded-full w-full"></div>
+          </div>
+        </div>
+
+
+
+
       </div>
 
       {/* ==================== CHARTS SECTION ==================== */}
@@ -619,6 +689,7 @@ export default function RootWallet() {
             { id: "NFT Sale", label: "NFT Sale", count: transactions.transactions.filter(t => t.type === "NFT Sale").length },
             { id: "Parent Payout", label: "Parent Payout", count: transactions.transactions.filter(t => t.type === "Parent Payout").length },
             { id: "Upgrade", label: "Upgrade", count: transactions.transactions.filter(t => t.type === "Upgrade").length },
+            { id: "Withdrawal Approved", label: "Withdrawal Approved", count: transactions.transactions.filter(t => t.type === "Withdrawal Approved").length },
             { id: "Other", label: "Other", count: transactions.transactions.filter(t => t.type === "Other").length }
           ].map((tab) => (
             <button

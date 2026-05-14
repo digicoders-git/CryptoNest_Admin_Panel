@@ -9,6 +9,7 @@ const MasterDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [rootWalletStats, setRootWalletStats] = useState({ totalIncome: 0, totalPayouts: 0, adminNftTotal: 0, nftSaleTotal: 0, totalRegistrations: 0 });
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '').replace(/\/api$/, '') + '/api/';
 
@@ -41,11 +42,62 @@ const MasterDashboard = () => {
     }
   };
 
+  // Root Wallet API se data fetch karne ka function (to match Root Wallet page)
+  const fetchRootWalletData = async () => {
+    try {
+      const token = localStorage.getItem('token') || localStorage.getItem('superAdminToken');
+      const response = await fetch(`${baseUrl}SuperAdmin/company-transactions`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        const allTransactions = result.transactions || [];
+        const totalIncome = result.summary?.totalIncome || 0;
+        
+        const totalPayouts = allTransactions
+          .filter((tx) => tx.type === "Parent Payout")
+          .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+
+        const adminNftTotal = allTransactions
+          .filter((tx) => tx.type === "Admin NFT Sold")
+          .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
+
+        const nftSaleTotal = allTransactions
+          .filter((tx) => tx.type === "NFT Sale" && tx.companyShare === 4)
+          .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
+
+        const totalRegistrations = allTransactions
+          .filter(tx => tx.type === "Registration")
+          .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+
+        const withdrawalApprovedTotal = allTransactions
+          .filter((tx) => tx.type === "Withdrawal Approved")
+          .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
+
+        setRootWalletStats({
+          totalIncome,
+          totalPayouts,
+          adminNftTotal,
+          nftSaleTotal,
+          totalRegistrations,
+          withdrawalApprovedTotal
+        });
+      }
+    } catch (err) {
+      console.error('Root Wallet Fetch error:', err);
+    }
+  };
+
   useEffect(() => {
     fetchDashboardData();
+    fetchRootWalletData();
 
     // Auto refresh every 30 seconds
-    const interval = setInterval(fetchDashboardData, 30000);
+    const interval = setInterval(() => {
+      fetchDashboardData();
+      fetchRootWalletData();
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -79,6 +131,16 @@ const MasterDashboard = () => {
   if (!dashboardData) return null;
 
   const data = dashboardData;
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+    }).format(amount);
+  };
+
+  const companyNetProfit = (rootWalletStats.totalRegistrations || 0) + (rootWalletStats.nftSaleTotal || 0) + (rootWalletStats.adminNftTotal || 0) - (rootWalletStats.totalPayouts || 0) - (rootWalletStats.withdrawalApprovedTotal || 0);
 
   // ========== HIGHCHARTS CONFIGURATIONS ==========
 
@@ -234,11 +296,6 @@ const MasterDashboard = () => {
               </div>
               <div className="text-3xl opacity-50"><FaUsers className="text-yellow-500/50" /></div>
             </div>
-            <div className="mt-4 flex gap-4 text-sm">
-              <div><span className="text-yellow-500">Active:</span> {data.users?.active || 0}</div>
-              <div><span className="text-gray-400">Inactive:</span> {data.users?.inactive || 0}</div>
-              <div><span className="text-red-400">Frozen:</span> {data.users?.frozen || 0}</div>
-            </div>
           </div>
 
           {/* NFTs Card */}
@@ -251,23 +308,20 @@ const MasterDashboard = () => {
               </div>
               <div className="text-3xl opacity-50"><FaImage className="text-yellow-500/50" /></div>
             </div>
-            <div className="mt-4 flex gap-4 text-sm">
-              <div><span className="text-green-400">Available:</span> {data.nfts?.available || 0}</div>
-              <div><span className="text-yellow-500">Sold:</span> {data.nfts?.sold || 0}</div>
-            </div>
           </div>
 
-          {/* Finance Card */}
+          {/* Company Net Profit Card */}
           <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-500/30 rounded-2xl p-6 shadow-2xl hover:shadow-yellow-500/10 transition-all duration-300">
             <div className="flex justify-between items-start">
               <div>
-                <div className="text-yellow-500 text-sm uppercase tracking-wider">Company Balance</div>
-                <div className="text-3xl font-bold mt-2 text-white">{data.finance?.companyTotalBalance || 0} ETH</div>
-                <div className="text-gray-400 text-sm mt-2 truncate">{data.finance?.companyWallet?.slice(0, 12)}...</div>
+                <div className="text-yellow-500 text-sm uppercase tracking-wider">Company Net Profit</div>
+                <div className="text-3xl font-bold mt-2 text-white">{formatCurrency(companyNetProfit)}</div>
+                <div className="text-green-400 text-sm mt-2">Overall Profit</div>
               </div>
-              <div className="text-3xl opacity-50"><FaWallet className="text-yellow-500/50" /></div>
+              <div className="text-3xl opacity-50"><FaChartLine className="text-yellow-500/50" /></div>
             </div>
           </div>
+
 
           {/* Contacts Card */}
           <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-500/30 rounded-2xl p-6 shadow-2xl hover:shadow-yellow-500/10 transition-all duration-300">

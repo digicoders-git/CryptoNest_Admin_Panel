@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { onForegroundMessage, generateAndSaveFCMToken } from "../config/firebase";
@@ -20,7 +21,7 @@ import {
   FaTimes,
   FaUser,
 } from "react-icons/fa";
-import { FiMoon, FiSun } from "react-icons/fi";
+
 import { GiHamburgerMenu } from "react-icons/gi";
 
 /* ── ACTIVE / INACTIVE MENU STYLE ── */
@@ -46,14 +47,13 @@ const MENU = [
   // ["CryptoNest Transactions", "/Dashbord/nft-transactions", FaHistory],
 
   ["User Marketplace", "/Dashbord/user-marketplace-nfts", FaStoreAlt],
-  ["Change Password", "/Dashbord/change-password", FaKey],
+  // ["Change Password", "/Dashbord/change-password", FaKey],
   ["Profile", "/Dashbord/profile", FaUserCircle],
 ];
 
 export default function MainDashBord() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [dateTime, setDateTime] = useState(new Date());
   const [user, setUser] = useState(null);
@@ -114,11 +114,6 @@ export default function MainDashBord() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  /* DARK MODE */
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode);
-  }, [darkMode]);
-
   /* REAL TIME CLOCK */
   useEffect(() => {
     const timer = setInterval(() => setDateTime(new Date()), 1000);
@@ -153,17 +148,6 @@ export default function MainDashBord() {
 
   return (
     <div className="h-screen flex bg-black overflow-hidden">
-
-      {/* ── DARK MODE TOGGLE ── */}
-      <button
-        onClick={() => setDarkMode(!darkMode)}
-        className="fixed bottom-5 right-5 z-50 w-11 h-11 rounded-full
-          bg-gradient-to-br from-[#D4AF37] to-[#F3C06A]
-          text-black flex items-center justify-center shadow-xl
-          hover:scale-110 transition-transform duration-200"
-      >
-        {darkMode ? <FiSun size={16} /> : <FiMoon size={16} />}
-      </button>
 
       {/* ── MOBILE OVERLAY ── */}
       {sidebarOpen && isMobile && (

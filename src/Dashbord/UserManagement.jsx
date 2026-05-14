@@ -241,7 +241,14 @@ const UserManagement = () => {
       const result = await response.json();
 
       if (result.success) {
-        alert('✏️ User updated successfully!');
+        Swal.fire({
+          icon: 'success',
+          title: 'Updated!',
+          text: 'User updated successfully!',
+          background: '#000',
+          color: '#D4AF37',
+          confirmButtonColor: '#D4AF37'
+        });
         setShowEditModal(false);
         setSelectedUser(null);
         fetchUsers();
@@ -249,7 +256,14 @@ const UserManagement = () => {
         throw new Error(result.message || 'Update failed');
       }
     } catch (err) {
-      alert(`❌ Error: ${err.message}`);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: err.message,
+        background: '#000',
+        color: '#D4AF37',
+        confirmButtonColor: '#D4AF37'
+      });
     } finally {
       setActionLoading(null);
     }
@@ -380,7 +394,7 @@ const UserManagement = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-500/30 rounded-2xl p-5 hover:scale-105 transition-all duration-300">
             <div className="flex justify-between items-start">
               <div>
@@ -414,16 +428,7 @@ const UserManagement = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-900 to-black border border-red-500/30 rounded-2xl p-5 hover:scale-105 transition-all duration-300">
-            <div className="flex justify-between items-start">
-              <div>
-                <div className="text-red-400 text-xs uppercase tracking-wider">Frozen</div>
-                <div className="text-3xl font-bold mt-1 text-white">{stats.frozen}</div>
-                <div className="text-red-400 text-sm mt-1">Restricted</div>
-              </div>
-              <FaSnowflake className="text-3xl text-red-400/50" />
-            </div>
-          </div>
+
 
           <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-500/30 rounded-2xl p-5 hover:scale-105 transition-all duration-300">
             <div className="flex justify-between items-start">
@@ -466,8 +471,7 @@ const UserManagement = () => {
             {[
               { value: 'all', label: 'All', count: stats.total },
               { value: 'active', label: 'Active', count: stats.active },
-              { value: 'inactive', label: 'Inactive', count: stats.inactive },
-              { value: 'frozen', label: 'Frozen', count: stats.frozen }
+              { value: 'inactive', label: 'Inactive', count: stats.inactive }
             ].map(filter => (
               <button
                 key={filter.value}
@@ -551,13 +555,13 @@ const UserManagement = () => {
                               <FaEdit />
                             </button>
                             {!user.isActive && !user.isFrozen && (
-                              <button onClick={() => handleActivate(user._id)} disabled={actionLoading === user._id} className="bg-green-600/20 hover:bg-green-600 text-green-400 hover:text-white p-2 rounded-lg transition-all" title="Activate">
-                                <FaToggleOn />
+                              <button onClick={() => handleActivate(user._id)} disabled={actionLoading === user._id} className="bg-gray-600/20 hover:bg-green-600 text-gray-400 hover:text-white p-2 rounded-lg transition-all" title="Activate">
+                                <FaToggleOff />
                               </button>
                             )}
                             {user.isActive && !user.isFrozen && (
-                              <button onClick={() => handleDeactivate(user._id)} disabled={actionLoading === user._id} className="bg-orange-600/20 hover:bg-orange-600 text-orange-400 hover:text-white p-2 rounded-lg transition-all" title="Deactivate">
-                                <FaToggleOff />
+                              <button onClick={() => handleDeactivate(user._id)} disabled={actionLoading === user._id} className="bg-green-600/20 hover:bg-orange-600 text-green-400 hover:text-white p-2 rounded-lg transition-all" title="Deactivate">
+                                <FaToggleOn />
                               </button>
                             )}
                             <button onClick={() => handleDelete(user._id)} disabled={actionLoading === user._id} className="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white p-2 rounded-lg transition-all" title="Delete">
@@ -662,35 +666,7 @@ const UserManagement = () => {
                       className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:border-yellow-500 focus:outline-none"
                     />
                   </div>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={editFormData.canTrade}
-                        onChange={(e) => setEditFormData({ ...editFormData, canTrade: e.target.checked })}
-                        className="w-4 h-4 accent-yellow-500"
-                      />
-                      <span className="text-gray-400 text-sm">Can Trade</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={editFormData.canWithdraw}
-                        onChange={(e) => setEditFormData({ ...editFormData, canWithdraw: e.target.checked })}
-                        className="w-4 h-4 accent-yellow-500"
-                      />
-                      <span className="text-gray-400 text-sm">Can Withdraw</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={editFormData.isFrozen}
-                        onChange={(e) => setEditFormData({ ...editFormData, isFrozen: e.target.checked })}
-                        className="w-4 h-4 accent-red-500"
-                      />
-                      <span className="text-red-400 text-sm">Frozen</span>
-                    </label>
-                  </div>
+
                 </div>
 
                 <div className="flex gap-3 pt-4">

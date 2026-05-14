@@ -1,5 +1,6 @@
 // WithdrawalManagement.jsx
 import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import { FaChartPie, FaCoins, FaChartLine, FaSync, FaCheckCircle, FaClock, FaTimesCircle, FaInbox, FaCheck, FaTimes, FaHourglassHalf } from 'react-icons/fa';
@@ -121,7 +122,16 @@ const WithdrawalManagement = () => {
       const result = await response.json();
 
       if (result.success) {
-        alert('✅ Withdrawal approved successfully!');
+        Swal.fire({
+          icon: 'success',
+          title: 'Approved!',
+          text: 'Withdrawal approved successfully!',
+          background: '#000000',
+          color: '#F3C06A',
+          confirmButtonColor: '#D4AF37',
+          timer: 2000,
+          showConfirmButton: false
+        });
         setShowModal(false);
         setTxHash('');
         setModalType(null);
@@ -130,7 +140,14 @@ const WithdrawalManagement = () => {
         throw new Error(result.message || 'Approval failed');
       }
     } catch (err) {
-      alert(`❌ Error: ${err.message}`);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: err.message,
+        background: '#000000',
+        color: '#F3C06A',
+        confirmButtonColor: '#D4AF37'
+      });
     } finally {
       setActionLoading(null);
     }
@@ -153,7 +170,16 @@ const WithdrawalManagement = () => {
       const result = await response.json();
 
       if (result.success) {
-        alert('Withdrawal rejected successfully!');
+        Swal.fire({
+          icon: 'success',
+          title: 'Rejected!',
+          text: 'Withdrawal rejected successfully!',
+          background: '#000000',
+          color: '#F3C06A',
+          confirmButtonColor: '#D4AF37',
+          timer: 2000,
+          showConfirmButton: false
+        });
         setShowModal(false);
         setRejectReason('');
         setModalType(null);
@@ -162,7 +188,14 @@ const WithdrawalManagement = () => {
         throw new Error(result.message || 'Rejection failed');
       }
     } catch (err) {
-      alert(`❌ Error: ${err.message}`);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: err.message,
+        background: '#000000',
+        color: '#F3C06A',
+        confirmButtonColor: '#D4AF37'
+      });
     } finally {
       setActionLoading(null);
     }

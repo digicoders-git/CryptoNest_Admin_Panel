@@ -1,5 +1,6 @@
 // NFTMarketplaceDashboard.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Highcharts from 'highcharts';
 import HighchartsReact from 'highcharts-react-official';
 import {
@@ -26,6 +27,7 @@ import {
 const API_URL = (import.meta.env.VITE_API_BASE_URL || 'https://cryptonest-backend.onrender.com').replace(/\/+$/, '').replace(/\/api$/, '') + '/api/';
 
 const NFTMarketplaceDashboard = () => {
+  const navigate = useNavigate();
   const [marketplaceData, setMarketplaceData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -143,16 +145,35 @@ const NFTMarketplaceDashboard = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-500 text-5xl mb-4">⚠️</div>
-          <div className="text-red-500 text-xl mb-4">Error: {error}</div>
-          <button
-            onClick={fetchMarketplaceNFTs}
-            className="bg-yellow-500 hover:bg-yellow-600 text-black px-6 py-2 rounded-xl transition-all"
-          >
-            Try Again
-          </button>
+      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-[#D4AF37]/30 rounded-3xl p-8 text-center shadow-2xl">
+            <div className="text-6xl mb-6 animate-bounce">🚀</div>
+            <h2 className="text-2xl font-black text-[#F3C06A] mb-3 uppercase tracking-wider">Pre-Launch Phase</h2>
+            <p className="text-[#D4AF37]/70 text-sm mb-2 leading-relaxed">Admin NFT generation अभी तक शुरू नहीं हुआ है।</p>
+            <p className="text-[#D4AF37]/50 text-xs mb-6 leading-relaxed">NFT Admin Panel से नए NFTs generate करने के लिए आगे बढ़ें।</p>
+            <div className="bg-[#D4AF37]/5 border border-[#D4AF37]/20 rounded-xl p-4 mb-6">
+              <p className="text-[#D4AF37]/60 text-xs font-bold uppercase tracking-widest mb-2">Status</p>
+              <p className="text-[#F3C06A] font-bold text-sm">⏳ Waiting for Admin Setup</p>
+            </div>
+            <div className="space-y-3">
+              <button
+                onClick={() => navigate('/Dashbord/nft-admin')}
+                className="w-full bg-gradient-to-r from-[#D4AF37] via-[#F3C06A] to-[#D4AF37] text-black font-black py-3 px-4 rounded-xl hover:brightness-110 transition-all duration-300 transform active:scale-95 shadow-lg shadow-[#D4AF37]/20 uppercase tracking-widest text-sm"
+              >
+                ✨ Create NFT Now
+              </button>
+              <button
+                onClick={fetchMarketplaceNFTs}
+                className="w-full bg-[#D4AF37]/10 hover:bg-[#D4AF37]/20 text-[#D4AF37] font-bold py-3 px-4 rounded-xl transition-all duration-300 border border-[#D4AF37]/30 uppercase tracking-widest text-sm"
+              >
+                🔄 Retry Loading
+              </button>
+            </div>
+            <div className="mt-6 pt-6 border-t border-[#D4AF37]/10">
+              <p className="text-[#D4AF37]/40 text-xs font-bold uppercase tracking-widest">💡 Tip: Go to NFT Admin to generate your first batch</p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -334,10 +355,16 @@ const NFTMarketplaceDashboard = () => {
 
         {/* No Results */}
         {paginatedNFTs.length === 0 && (
-          <div className="bg-gray-900/40 backdrop-blur-sm rounded-2xl border border-yellow-500/20 p-12 text-center mb-6">
-            <FaStore className="text-6xl text-yellow-500/20 mx-auto mb-4" />
-            <h3 className="text-xl text-gray-400 mb-2">No NFTs Found</h3>
-            <p className="text-gray-500 text-sm">Try searching with a different keyword</p>
+          <div className="bg-gradient-to-br from-gray-900 to-black backdrop-blur-sm rounded-2xl border-2 border-[#D4AF37]/30 p-12 text-center mb-6">
+            <FaStore className="text-6xl text-[#D4AF37]/20 mx-auto mb-4" />
+            <h3 className="text-xl text-[#F3C06A] mb-2 font-bold">No NFTs Available</h3>
+            <p className="text-[#D4AF37]/60 text-sm mb-6">Marketplace is empty. Create NFTs from Admin Panel to get started.</p>
+            <button
+              onClick={() => navigate('/Dashbord/nft-admin')}
+              className="inline-block bg-gradient-to-r from-[#D4AF37] via-[#F3C06A] to-[#D4AF37] text-black font-black py-2.5 px-6 rounded-xl hover:brightness-110 transition-all duration-300 uppercase tracking-widest text-sm"
+            >
+              ✨ Create NFT
+            </button>
           </div>
         )}
 
@@ -456,11 +483,18 @@ const NFTMarketplaceDashboard = () => {
             transform: scale(1);
           }
         }
+        @keyframes bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
         .animate-fadeIn {
           animation: fadeIn 0.2s ease-out;
         }
         .animate-scaleIn {
           animation: scaleIn 0.2s ease-out;
+        }
+        .animate-bounce {
+          animation: bounce 2s infinite;
         }
       `}</style>
     </div>
