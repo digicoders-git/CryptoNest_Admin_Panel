@@ -243,7 +243,7 @@ export default function RootWallet() {
   // Calculate totals for cards
   const adminNftTotal = useMemo(() => {
     return transactions.transactions
-      .filter((tx) => tx.type === "Admin NFT Sold")
+      .filter((tx) => tx.type?.toLowerCase() === "admin nft sold")
       .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
   }, [transactions.transactions]);
 
@@ -255,7 +255,7 @@ export default function RootWallet() {
 
   const nftSaleTotal = useMemo(() => {
     return transactions.transactions
-      .filter((tx) => tx.type === "NFT Sale" && tx.companyShare === 4)
+      .filter((tx) => tx.type?.toLowerCase() === "nft sale")
       .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
   }, [transactions.transactions]);
 
@@ -300,6 +300,8 @@ export default function RootWallet() {
         filtered = filtered.filter((tx) => tx.type === "NFT Sale");
       } else if (transactionFilterTab === "Upgrade") {
         filtered = filtered.filter((tx) => tx.type === "Upgrade");
+      } else if (transactionFilterTab === "NFT Profits") {
+        filtered = filtered.filter((tx) => tx.type?.toLowerCase() === "nft sale" || tx.type?.toLowerCase() === "admin nft sold");
       } else if (transactionFilterTab === "Withdrawal Approved") {
         filtered = filtered.filter((tx) => tx.type === "Withdrawal Approved");
       } else if (transactionFilterTab === "Other") {
@@ -563,6 +565,7 @@ export default function RootWallet() {
           </div>
           <p className="text-[#D4AF37]/50 text-[9px] uppercase font-bold tracking-wider">Total NFT Profit</p>
           <h3 className="text-xl md:text-2xl font-black text-white mt-1">{formatCurrency(adminNftTotal + nftSaleTotal)}</h3>
+
           <div className="mt-3 h-0.5 bg-[#D4AF37]/20 rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-[#10B981] to-[#F59E0B] rounded-full w-full"></div>
           </div>
@@ -687,6 +690,7 @@ export default function RootWallet() {
             { id: "all", label: "All", count: transactions.transactions.length },
             { id: "Registration", label: "Registration", count: transactions.transactions.filter(t => t.type === "Registration").length },
             { id: "NFT Sale", label: "NFT Sale", count: transactions.transactions.filter(t => t.type === "NFT Sale").length },
+            { id: "NFT Profits", label: "NFT Profits", count: transactions.transactions.filter(t => t.type?.toLowerCase() === "nft sale" || t.type?.toLowerCase() === "admin nft sold").length },
             { id: "Parent Payout", label: "Parent Payout", count: transactions.transactions.filter(t => t.type === "Parent Payout").length },
             { id: "Upgrade", label: "Upgrade", count: transactions.transactions.filter(t => t.type === "Upgrade").length },
             { id: "Withdrawal Approved", label: "Withdrawal Approved", count: transactions.transactions.filter(t => t.type === "Withdrawal Approved").length },

@@ -56,23 +56,23 @@ const MasterDashboard = () => {
         const totalIncome = result.summary?.totalIncome || 0;
         
         const totalPayouts = allTransactions
-          .filter((tx) => tx.type === "Parent Payout")
+          .filter((tx) => tx.type?.toLowerCase() === "parent payout")
           .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
 
         const adminNftTotal = allTransactions
-          .filter((tx) => tx.type === "Admin NFT Sold")
+          .filter((tx) => tx.type?.toLowerCase() === "admin nft sold")
           .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
 
         const nftSaleTotal = allTransactions
-          .filter((tx) => tx.type === "NFT Sale" && tx.companyShare === 4)
+          .filter((tx) => tx.type?.toLowerCase() === "nft sale")
           .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
 
         const totalRegistrations = allTransactions
-          .filter(tx => tx.type === "Registration")
+          .filter(tx => tx.type?.toLowerCase() === "registration")
           .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
 
         const withdrawalApprovedTotal = allTransactions
-          .filter((tx) => tx.type === "Withdrawal Approved")
+          .filter((tx) => tx.type?.toLowerCase() === "withdrawal approved")
           .reduce((sum, tx) => sum + Math.abs(tx.amount || 0), 0);
 
         setRootWalletStats({
